@@ -1,0 +1,5744 @@
+variables
+{
+	global:
+		0: fteam1Lucio1TrackID
+		1: team1Lucio2TrackID
+		2: team1Lucio3TrackID
+		3: team1Lucio4TrackID
+		4: team1Lucio5TrackID
+		5: team1Lucio6TrackID
+		6: team2Lucio1TrackID
+		7: team2Lucio2TrackID
+		8: team2Lucio3TrackID
+		9: team2Lucio4TrackID
+		10: team2Lucio5TrackID
+		11: team2Lucio6TrackID
+
+	player:
+		0: hero
+		1: orisaRecordDirection
+		2: orisaPullBonusSpent
+		3: orisaAbility2Fired
+		4: orisaUltPosition
+		5: moiraResourceCost
+		6: echoHealBeamDistance
+		7: sombraHackRange
+		8: tracerBlinkPos
+		9: reinSheildHopped
+		10: torbOverloadCD
+		11: torbUltRange
+		12: bapMeleeBoost
+		13: doomShieldHealthBonus
+		14: doomDamageBonus
+		15: doomAbilityEnergyCost
+		16: doomDamageBonusMax
+		17: zenFlightTime
+		18: mercyCooldowns
+		19: echoIsLinked
+		20: ballUniVar
+		23: ballHealthNomalized
+		24: genjiTripleJumpCount
+		25: genjiTripleJumpAllowed
+		26: ballEnemySlot
+		27: ballSheildsAmount
+		28: ballSheildsArray
+		29: ballSheildsArrayIndex
+		30: bastionSprinting
+		31: bastionEchoSprintingText
+		33: torbJumpPads
+		34: tracerV_BlinkAllowed
+		35: genjiAmmoAltTick
+		36: genjiUsingNewUlt
+		37: genjiLeechAmount
+		38: genjiUltEnimyEffects
+		39: genjiUltCharge
+		40: genjiUltTextEffects
+		41: babyDVaTripleJumpCount
+		42: babyDVaTripleJumpAllowed
+		43: dvaUltEjectValue
+		44: lucioHealAmount
+		45: lucioEffectsArray
+		46: lucioTrackNumber
+		47: lucioBoopCount
+		49: lucioSwitchAllowed
+		50: lucioHOT_ID
+		51: lucioEffectsHistory
+		52: orisaFortifyHealthPool
+		53: orisaFortifyEffectsArray
+		54: orisaIsFortified
+		55: orisaSpeed
+		56: reinhardtBodyShieldEnabled
+		57: reinhardtBodyShieldID
+		58: reinhardtCurrentChargeAngle
+		59: roadhogScrapBarID
+		60: roadhogScrapBarValue
+		61: roadhogReloadTimer
+		62: roadhogDamageHistory
+		63: roadhogDamageHistoryItterator
+		64: roadhogTotalHealAmount
+		65: roadhogHealAreaValues
+		66: roadhogHealArrayTotal
+		67: roadhogButcheryStacks
+		68: roadhogHealCost
+		69: roadhogTempBucheryStacks
+		70: roadhogConsumeStacks
+		71: roadhogEnimyRootPosition
+		72: reinhardtChargeDirection
+		77: mercyUsingValk
+		78: mercyRezing
+		79: mercyRezList
+		80: mercyBrittleHealingEffect
+		81: mercyBrittleHealingTargetSlotID
+		82: mercyIsBrittleHealing
+		83: mercyBrittleHealingHoT_ID
+		84: mercyBrittleHealingStartHealth
+		85: mercyPlayerHasBrittleHealth
+		86: mercyBrittleHealerSlotID
+		87: mercyIsDepowering
+		88: mercyDepoweringEffect
+		89: mercyDepoweringTargetSlotID
+		90: mercyDepoweringID
+}
+
+subroutines
+{
+	0: Sub0_init
+	1: Sub1_globalReset
+	2: Sub2_genjiStartUlt
+	3: Sub3_genjiStopUlt
+	4: Sub4_lucioUpdateGlobalTrackID
+	5: Sub5_orisaEnableFortify
+	6: Sub6_orisaDisableFortify
+	7: Sub7_evaluateRoadhogHealCost
+	8: Sub8_heroReset
+	9: Sub9_initAshe
+}
+
+rule("Code By T54 - Licenced Under GNU AGPL 3.0 - https://www.gnu.org/licenses/agpl-3.0.en.html // Displays beta and licence badge.")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(All Players(All Teams), Custom String("Licence"), Custom String("https://www.gnu.org/licenses/agpl-3.0.en.html"),
+			Null, Right, 0, Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Custom String("ALPHA"), Custom String("This software is in development."), Null, Right, 0,
+			Color(Green), Color(Lime Green), Color(Green), Visible To and String, Visible Always);
+	}
+}
+
+rule("Sub - init")
+{
+	event
+	{
+		Subroutine;
+		Sub0_init;
+	}
+
+	actions
+	{
+		Event Player.moiraResourceCost = 30;
+		Event Player.echoHealBeamDistance = 200;
+		Event Player.doomShieldHealthBonus = 0.025;
+		Event Player.doomDamageBonusMax = 400;
+		Event Player.doomAbilityEnergyCost = 40;
+		Event Player.doomDamageBonus = Event Player.doomDamageBonusMax;
+		Event Player.echoIsLinked = False;
+		Event Player.ballUniVar = 100;
+		Event Player.genjiTripleJumpCount = 1;
+		Event Player.ballSheildsArray = Array();
+		Event Player.torbOverloadCD = 0;
+		Event Player.tracerV_BlinkAllowed = False;
+		Event Player.genjiLeechAmount = 10;
+		Event Player.genjiUltEnimyEffects = Array();
+		Event Player.genjiUltCharge = 0;
+		Event Player.lucioSwitchAllowed = True;
+		Event Player.lucioHealAmount = 64;
+		Event Player.lucioEffectsArray = Array(Null, Null);
+		Event Player.lucioBoopCount = 0;
+		Event Player.lucioTrackNumber = 0;
+		Event Player.lucioEffectsHistory = Array(0, Array(), Array());
+		Call Subroutine(Sub3_genjiStopUlt);
+		Event Player.orisaFortifyEffectsArray = Array(Null, Null);
+		Event Player.reinhardtBodyShieldEnabled = False;
+		Event Player.roadhogScrapBarID = 0;
+		Event Player.roadhogScrapBarValue = 0;
+		Event Player.roadhogReloadTimer = 0;
+		Event Player.roadhogDamageHistory = Array();
+		Event Player.roadhogDamageHistoryItterator = 0;
+		Event Player.roadhogTotalHealAmount = 150;
+		Event Player.roadhogHealAreaValues = Array();
+	}
+}
+
+rule("Sub - Global Reset")
+{
+	event
+	{
+		Subroutine;
+		Sub1_globalReset;
+	}
+
+	actions
+	{
+		Allow Button(Event Player, Button(Primary Fire));
+		Allow Button(Event Player, Button(Secondary Fire));
+		Allow Button(Event Player, Button(Ability 1));
+		Allow Button(Event Player, Button(Ability 2));
+		Allow Button(Event Player, Button(Ultimate));
+		Allow Button(Event Player, Button(Interact));
+		Allow Button(Event Player, Button(Jump));
+		Allow Button(Event Player, Button(Crouch));
+		Allow Button(Event Player, Button(Melee));
+		Allow Button(Event Player, Button(Reload));
+		Cancel Primary Action(Event Player);
+		Clear Status(Event Player, Hacked);
+		Clear Status(Event Player, Burning);
+		Clear Status(Event Player, Knocked Down);
+		Clear Status(Event Player, Asleep);
+		Clear Status(Event Player, Frozen);
+		Clear Status(Event Player, Unkillable);
+		Clear Status(Event Player, Invincible);
+		Clear Status(Event Player, Phased Out);
+		Clear Status(Event Player, Rooted);
+		Clear Status(Event Player, Stunned);
+		Detach Players(Event Player);
+		Enable Built-In Game Mode Respawning(Event Player);
+		Enable Death Spectate All Players(Event Player);
+		Enable Death Spectate Target HUD(Event Player);
+		Enable Game Mode HUD(Event Player);
+		Enable Game Mode In-World UI(Event Player);
+		Enable Hero HUD(Event Player);
+		Enable Kill Feed(Event Player);
+		Enable Messages(Event Player);
+		Enable Movement Collision With Environment(Event Player);
+		Enable Movement Collision With Players(Event Player);
+		Enable Scoreboard(Event Player);
+		Enable Text Chat(Event Player);
+		Enable Voice Chat(Event Player);
+		Remove All Health Pools From Player(Event Player);
+		Reset Player Hero Availability(Event Player);
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+		Set Aim Speed(Event Player, 100);
+		Set Crouch Enabled(Event Player, True);
+		Set Damage Dealt(Event Player, 100);
+		Set Damage Received(Event Player, 100);
+		Set Gravity(Event Player, 100);
+		Set Healing Dealt(Event Player, 100);
+		Set Healing Received(Event Player, 100);
+		Set Invisible(Event Player, None);
+		Set Jump Enabled(Event Player, True);
+		Set Jump Vertical Speed(Event Player, 100);
+		Set Knockback Dealt(Event Player, 100);
+		Set Knockback Received(Event Player, 100);
+		Set Max Health(Event Player, 100);
+		Set Melee Enabled(Event Player, True);
+		Set Move Speed(Event Player, 100);
+		Set Primary Fire Enabled(Event Player, True);
+		Set Projectile Gravity(Event Player, 100);
+		Set Projectile Speed(Event Player, 100);
+		Set Reload Enabled(Event Player, True);
+		Set Respawn Max Time(Event Player, 10);
+		Set Secondary Fire Enabled(Event Player, True);
+		Set Slow Motion(100);
+		Set Ultimate Ability Enabled(Event Player, True);
+		Set Ultimate Charge(Event Player, 0);
+		Set Weapon(Event Player, 1);
+		Stop Accelerating(Event Player);
+		Stop Camera(Event Player);
+		Stop Facing(Event Player);
+		Stop Forcing Dummy Bot Name(Event Player);
+		Stop Forcing Player Outlines(Event Player, All Players(All Teams));
+		Stop Forcing Player Position(Event Player);
+		Stop Forcing Player To Be Hero(Event Player);
+		Stop Forcing Throttle(Event Player);
+		Stop Holding Button(Event Player, Button(Primary Fire));
+		Stop Holding Button(Event Player, Button(Secondary Fire));
+		Stop Holding Button(Event Player, Button(Ability 1));
+		Stop Holding Button(Event Player, Button(Ability 2));
+		Start Holding Button(Event Player, Button(Ultimate));
+		Stop Holding Button(Event Player, Button(Interact));
+		Stop Holding Button(Event Player, Button(Jump));
+		Stop Holding Button(Event Player, Button(Crouch));
+		Stop Holding Button(Event Player, Button(Melee));
+		Stop Holding Button(Event Player, Button(Reload));
+		Stop Modifying Hero Voice Lines(Event Player);
+		Stop Scaling Barriers(Event Player);
+		Stop Scaling Player(Event Player);
+		Stop Throttle In Direction(Event Player);
+		Stop Transforming Throttle(Event Player);
+	}
+}
+
+rule("Sub - Hero Reset")
+{
+	event
+	{
+		Subroutine;
+		Sub8_heroReset;
+	}
+
+	actions
+	{
+		If(Hero Of(Event Player) == Hero(Ashe));
+			Call Subroutine(Sub9_initAshe);
+		End;
+	}
+}
+
+rule("Sub - Genji: Start ult")
+{
+	event
+	{
+		Subroutine;
+		Sub2_genjiStartUlt;
+	}
+
+	actions
+	{
+		Set Damage Dealt(Event Player, 70);
+		Event Player.genjiLeechAmount = 20;
+		Set Damage Received(Event Player, 80);
+		Create HUD Text(Event Player, Custom String("The Dragon Has Become You!!!"), Null, Null, Top, 0, Color(Green), Color(White), Color(
+			White), Visible To and String, Default Visibility);
+		Event Player.genjiUltTextEffects = Last Text ID;
+		Create Effect(All Players(Opposite Team Of(Team Of(Event Player))), Bad Aura, Color(Red), Event Player, 1,
+			Visible To Position and Radius);
+		Event Player.genjiUltEnimyEffects = Last Created Entity;
+		Event Player.genjiUsingNewUlt = True;
+	}
+}
+
+rule("Sub - Genji: Stop ult")
+{
+	event
+	{
+		Subroutine;
+		Sub3_genjiStopUlt;
+	}
+
+	actions
+	{
+		Set Damage Dealt(Event Player, 50);
+		Event Player.genjiLeechAmount = 10;
+		Set Damage Received(Event Player, 90);
+		Destroy HUD Text(Event Player.genjiUltTextEffects);
+		Destroy Effect(Event Player.genjiUltEnimyEffects);
+		Event Player.genjiUsingNewUlt = False;
+	}
+}
+
+rule("Sub - Lucio: Update global track id and text")
+{
+	event
+	{
+		Subroutine;
+		Sub4_lucioUpdateGlobalTrackID;
+	}
+
+	actions
+	{
+		If(Slot Of(Event Player) == 0);
+			Global.fteam1Lucio1TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 1);
+			Global.team1Lucio2TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 2);
+			Global.team1Lucio3TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 3);
+			Global.team1Lucio4TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 4);
+			Global.team1Lucio5TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 5);
+			Global.team1Lucio6TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 6);
+			Global.team2Lucio1TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 7);
+			Global.team2Lucio2TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 8);
+			Global.team2Lucio3TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 9);
+			Global.team2Lucio4TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 10);
+			Global.team2Lucio5TrackID = Event Player.lucioTrackNumber;
+		Else If(Slot Of(Event Player) == 11);
+			Global.team2Lucio6TrackID = Event Player.lucioTrackNumber;
+		End;
+	}
+}
+
+rule("Sub - Orisa: Enable fortify")
+{
+	event
+	{
+		Subroutine;
+		Sub5_orisaEnableFortify;
+	}
+
+	actions
+	{
+		Set Max Health(Event Player, 75);
+		Add Health Pool To Player(Event Player, Armor, 300, True, True);
+		Event Player.orisaFortifyHealthPool = Last Created Health Pool;
+		Set Damage Received(Event Player, 50);
+		Set Damage Dealt(Event Player, 50);
+		Set Gravity(Event Player, 300);
+		Set Knockback Received(Event Player, 0);
+		Set Max Ammo(Event Player, 0, 150);
+		If(Ammo(Event Player, 0) > 150);
+			Set Ammo(Event Player, 0, 150);
+		End;
+		Start Forcing Throttle(Event Player, 0, 0.500, 0, 0.500, 0, 0.500);
+		Set Projectile Speed(Event Player, 100);
+		Create Effect(All Players(All Teams), Good Aura, Custom Color(181, 63, 5, 255), Event Player, 1, Visible To Position and Radius);
+		Event Player.orisaFortifyEffectsArray[0] = Last Created Entity;
+		Create Effect(All Players(All Teams), Energy Sound, Color(White), Event Player, 5, Visible To Position and Radius);
+		Create HUD Text(Event Player, Custom String("Fortified!"), Null, Null, Top, 0, Custom Color(181, 63, 5, 255), Color(White), Color(
+			White), Visible To and String, Default Visibility);
+		Event Player.orisaFortifyEffectsArray[1] = Last Text ID;
+	}
+}
+
+rule("Sub - Orisa: Disable fortify")
+{
+	event
+	{
+		Subroutine;
+		Sub6_orisaDisableFortify;
+	}
+
+	actions
+	{
+		Set Max Health(Event Player, 50);
+		Remove Health Pool From Player(Event Player.orisaFortifyHealthPool);
+		Set Damage Received(Event Player, 100);
+		Set Damage Dealt(Event Player, 100);
+		Set Gravity(Event Player, 100);
+		Set Knockback Received(Event Player, 100);
+		Stop Forcing Throttle(Event Player);
+		Set Max Ammo(Event Player, 0, 300);
+		Set Ammo(Event Player, 0, Ammo(Event Player, 0) * 2);
+		Set Projectile Speed(Event Player, 300);
+		Destroy Effect(Event Player.orisaFortifyEffectsArray[0]);
+		Destroy HUD Text(Event Player.orisaFortifyEffectsArray[1]);
+	}
+}
+
+rule("Sub - Roadhog: Evaluate heal cost")
+{
+	event
+	{
+		Subroutine;
+		Sub7_evaluateRoadhogHealCost;
+	}
+
+	actions
+	{
+		Event Player.roadhogHealCost = 45;
+		Event Player.roadhogTempBucheryStacks = Event Player.roadhogButcheryStacks;
+		While(Event Player.roadhogHealCost > 30 && Event Player.roadhogTempBucheryStacks > 0);
+			Event Player.roadhogHealCost -= 5;
+			Event Player.roadhogTempBucheryStacks -= 1;
+		End;
+		If(Event Player.roadhogConsumeStacks == True);
+			Event Player.roadhogButcheryStacks = Event Player.roadhogTempBucheryStacks;
+		End;
+	}
+}
+
+disabled rule("Perform global reset on death")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	actions
+	{
+		Call Subroutine(Sub0_init);
+		Call Subroutine(Sub1_globalReset);
+		Wait Until(Has Spawned(Event Player) == True && Is Alive(Event Player) == True && Is In Spawn Room(Event Player) == False, 1800);
+	}
+}
+
+disabled rule("Perform global reset while player not selected hero")
+{
+	event
+	{
+		Player Joined Match;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == False;
+	}
+
+	actions
+	{
+		Call Subroutine(Sub0_init);
+		Call Subroutine(Sub1_globalReset);
+		Wait Until(Has Spawned(Event Player) == True && Is Alive(Event Player) == True && Is In Spawn Room(Event Player) == False, 1800);
+	}
+}
+
+rule("Perform global reset when entering spawn")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		disabled Is In Spawn Room(Event Player) == True;
+		Event Player.hero != Hero Of(Event Player);
+	}
+
+	actions
+	{
+		Call Subroutine(Sub0_init);
+		disabled Call Subroutine(Sub1_globalReset);
+		Call Subroutine(Sub8_heroReset);
+		disabled Wait Until(Has Spawned(Event Player) == True && Is Alive(Event Player) == True && Is In Spawn Room(Event Player) == False, 1800);
+	}
+}
+
+rule("Set Global Vars/Setup")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is In Spawn Room(Event Player) == True;
+	}
+
+	actions
+	{
+		Start Rule(Sub0_init, Restart Rule);
+	}
+}
+
+rule("Display server performance characteristics")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(All Players(All Teams), String("{0}: {1}", String("Server Load"), String("{0}%", Server Load)), Null, Null, Left,
+			0, Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), String("{0}: {1}", String("Server Load Average"), String("{0}%", Server Load Average)),
+			Null, Null, Left, 1, Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), String("{0}: {1}", String("Server Load Peak"), String("{0}%", Server Load Peak)), Null,
+			Null, Left, 2, Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
+	}
+}
+
+rule("Fully charge ult on intereact")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Interact)) == True;
+	}
+
+	actions
+	{
+		Set Ultimate Charge(Event Player, 100);
+	}
+}
+
+rule("Create dummy on crouch and interact")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Crouching(Event Player) == True;
+		Is Button Held(Event Player, Button(Interact)) == True;
+	}
+
+	actions
+	{
+		Create Dummy Bot(Hero(Zarya), Opposite Team Of(Team Of(Event Player)), -1, Event Player, Facing Direction Of(Event Player));
+		Create Dummy Bot(Hero(Zarya), Team Of(Event Player), -1, Event Player, Facing Direction Of(Event Player));
+	}
+}
+
+rule("Damage self on melee and couched")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+		Is Crouching(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Player Health(All Players(Team Of(Event Player)), 5);
+	}
+}
+
+rule("Orisa: Startup")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, False);
+		Call Subroutine(Sub5_orisaEnableFortify);
+	}
+}
+
+rule("Orisa: Cleanup")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Orisa);
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, True);
+		Set Max Health(Event Player, 100);
+	}
+}
+
+disabled rule("Orisa: Throttle while reloading.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Reloading(Event Player) == True;
+	}
+
+	actions
+	{
+		Start Forcing Throttle(Event Player, 0, 0.250, 0, 0.250, 0, 0.250);
+		Wait Until(Is Reloading(Event Player) == False, 4);
+		Stop Forcing Throttle(Event Player);
+	}
+}
+
+rule("Orisa: Disable sheild while shooting")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Ability 2), 1);
+		Set Ability 2 Enabled(Event Player, False);
+		Set Projectile Gravity(Event Player, 0);
+		Wait Until(Is Firing Primary(Event Player) == False, 99999);
+		Set Ability 2 Enabled(Event Player, True);
+		Set Projectile Gravity(Event Player, 100);
+	}
+}
+
+rule("Orisa: Handle fortify")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+		Is Dead(Event Player) == False;
+	}
+
+	actions
+	{
+		If(Event Player.orisaIsFortified == False);
+			Event Player.orisaIsFortified = True;
+			Call Subroutine(Sub5_orisaEnableFortify);
+		Else;
+			Event Player.orisaIsFortified = False;
+			Call Subroutine(Sub6_orisaDisableFortify);
+		End;
+	}
+}
+
+rule("Orisa: Gallop")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Event Player.orisaIsFortified == False;
+		disabled Is On Ground(Event Player) == True;
+		Is Moving(Event Player) == True;
+		disabled Speed Of(Event Player) < 150;
+	}
+
+	actions
+	{
+		If(Event Player.orisaSpeed < 100);
+			Chase Player Variable At Rate(Event Player, orisaSpeed, Event Player.orisaSpeed + 5, 5, Destination and Rate);
+			Set Move Speed(Event Player, 100 + Event Player.orisaSpeed);
+		Else;
+			Set Move Speed(Event Player, 200);
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+		Event Player.orisaSpeed = 0;
+	}
+}
+
+rule("Orisa: Record orb direction.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Ability Cooldown(Event Player, Button(Secondary Fire)) == 0;
+		Is Using Ability 1(Event Player) == False;
+		Event Player.orisaAbility2Fired == 0;
+		Event Player.orisaIsFortified == False;
+	}
+
+	actions
+	{
+		Event Player.orisaRecordDirection = Facing Direction Of(Event Player);
+		Event Player.orisaPullBonusSpent = False;
+	}
+}
+
+rule("Orisa: Activate orb movement.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Jump)) == True;
+		disabled Is In Air(Event Player) == True;
+		Event Player.orisaPullBonusSpent == False;
+		Event Player.orisaIsFortified == False;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Event Player.orisaRecordDirection, 40, To World, Cancel Contrary Motion);
+		Event Player.orisaPullBonusSpent = True;
+		Event Player.orisaAbility2Fired = 2;
+		Chase Player Variable Over Time(Event Player, orisaAbility2Fired, 0, 2, Destination and Duration);
+	}
+}
+
+rule("Orisa: Disable primary if using ability 2.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Primary Fire Enabled(Event Player, False);
+		Set Gravity(Event Player, 300);
+		Set Move Speed(Event Player, 250);
+		Set Status(Event Player, Null, Unkillable, 4);
+	}
+}
+
+rule("Orisa: Enable primary if not using ability 2.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Primary Fire Enabled(Event Player, True);
+		Stop Accelerating(Event Player);
+		Set Move Speed(Event Player, 100);
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("Orisa: Record position and apply AOE speed and remove movement effects when ult used.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		disabled Is Button Held(Event Player, Button(Ultimate)) == True;
+		Is Using Ultimate(Event Player) == True;
+		disabled Ultimate Charge Percent(Event Player) == 100;
+	}
+
+	actions
+	{
+		Event Player.orisaUltPosition = World Vector Of(Event Player, Event Player, Rotation And Translation);
+		If(Is In Line of Sight(Event Player, All Players(Team Of(Event Player)), Barriers Do Not Block LOS));
+			Clear Status(Event Player, Knocked Down);
+			Clear Status(Event Player, Asleep);
+			Clear Status(Event Player, Frozen);
+			Clear Status(Event Player, Rooted);
+			Clear Status(Event Player, Stunned);
+			disabled Set Move Speed(Event Player, 150);
+			disabled Wait(8, Ignore Condition);
+			disabled Set Move Speed(Event Player, 100);
+		End;
+	}
+}
+
+disabled rule("Orisa: Apply AOE speed and remove movement effects on ult.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Orisa;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == False;
+	}
+}
+
+rule("Reaper: Remove gravity and increase speed while wraithing.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reaper;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Ability 2), 1);
+		Set Move Speed(Event Player, 150);
+		Set Gravity(Event Player, 0);
+		Create Effect(All Players(All Teams), Cloud, Color(Purple), Event Player, 1, Visible To Position and Radius);
+	}
+}
+
+rule("Reaper: Reset movement when not wraithing.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reaper;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+		Set Gravity(Event Player, 100);
+		Destroy All Effects;
+	}
+}
+
+rule("Reaper: Move up on jump")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reaper;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Jump)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up, 10, To World, Cancel Contrary Motion);
+	}
+}
+
+rule("Reaper: Move down on crouch")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reaper;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Crouch)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Down, 10, To World, Cancel Contrary Motion);
+	}
+}
+
+rule("Reaper: Ult cancels wraith.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reaper;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Ultimate)) == True;
+		Ultimate Charge Percent(Event Player) == 100;
+	}
+
+	actions
+	{
+		Set Ultimate Ability Enabled(Event Player, True);
+		Press Button(Event Player, Button(Ability 1));
+		Wait(0.047, Ignore Condition);
+		Press Button(Event Player, Button(Ultimate));
+	}
+}
+
+rule("Soldier: Reduce damage while sprinting")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Soldier: 76;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 125);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("Moira: Disable Ablities")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		Set Primary Fire Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, False);
+	}
+}
+
+rule("Moira: Lower gravity when using ablity 1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 25);
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire))
+			+ Event Player.moiraResourceCost);
+	}
+}
+
+rule("Moira: Reset gravity when not using ability 1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 75);
+	}
+}
+
+rule("Moira: Apply impulse when using ability 1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Is Button Held(Event Player, Button(Jump)) == True);
+			Apply Impulse(Event Player, Up, 15, To World, Cancel Contrary Motion);
+		Else;
+			Apply Impulse(Event Player, Facing Direction Of(Event Player), 15, To World, Cancel Contrary Motion);
+		End;
+	}
+}
+
+rule("Moira: Disable ability 1 if there is not enough resource else enable")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Ability Resource(Event Player, Button(Primary Fire)) > 100 - Event Player.moiraResourceCost / 3;
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Hero Of(Event Player) == Hero(Moira) && Ability Resource(Event Player, Button(Primary Fire))
+			> 100 - Event Player.moiraResourceCost / 3);
+			Set Ability 1 Enabled(Event Player, False);
+			Wait(0.250, Ignore Condition);
+			Loop If Condition Is True;
+			Set Ability 1 Enabled(Event Player, True);
+		End;
+	}
+}
+
+rule("Moira: Fire heal orb if primary held and enough resoures")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Ability Cooldown(Event Player, Button(Ability 1)) == 0;
+		Ability Cooldown(Event Player, Button(Ability 2)) == 0;
+		Ability Resource(Event Player, Button(Primary Fire)) > 10;
+		Is Alive(Event Player) == True;
+		!Is Using Ability 1(Event Player) == True;
+		!Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability 2 Enabled(Event Player, True);
+		Press Button(Event Player, Button(Ability 2));
+		Wait(0.250, Ignore Condition);
+		Press Button(Event Player, Button(Primary Fire));
+		Set Ability 2 Enabled(Event Player, False);
+		Set Ability Cooldown(Event Player, Button(Ability 1), 0.500);
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire))
+			- Event Player.moiraResourceCost);
+	}
+}
+
+rule("Moira: Fire damage orb if secondary held and enough resoures")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Ability Cooldown(Event Player, Button(Ability 1)) == 0;
+		Ability Cooldown(Event Player, Button(Ability 2)) == 0;
+		Ability Resource(Event Player, Button(Primary Fire)) > 10;
+		Is Alive(Event Player) == True;
+		!Is Using Ability 1(Event Player) == True;
+		!Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability 2 Enabled(Event Player, True);
+		Press Button(Event Player, Button(Ability 2));
+		Wait(0.250, Ignore Condition);
+		Press Button(Event Player, Button(Secondary Fire));
+		Set Ability 2 Enabled(Event Player, False);
+		Set Ability Cooldown(Event Player, Button(Ability 1), 0.500);
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire))
+			- Event Player.moiraResourceCost);
+	}
+}
+
+rule("Moira: Push back if ulting")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Facing Direction Of(Event Player), -1.500, To World, Incorporate Contrary Motion);
+		Set Gravity(Event Player, 75);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 90);
+	}
+}
+
+rule("Moira: On melee damage do bonus damage")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Meleeing(Event Player) == True;
+	}
+
+	actions
+	{
+		Damage(Victim, Null, 30);
+	}
+}
+
+rule("Moira: On melee near friendly heal target pt1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+	}
+
+	actions
+	{
+		Heal(Players Within Radius(Event Player, 2, Team Of(Event Player), Surfaces And Enemy Barriers), Event Player, 60);
+		Wait(1, Ignore Condition);
+	}
+}
+
+disabled rule("Moira: On melee near friendly heal target pt2")
+{
+	event
+	{
+		Player Dealt Healing;
+		All;
+		Moira;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+	}
+
+	actions
+	{
+		Damage(Event Player, Null, 30);
+	}
+}
+
+rule("Moira: Enable Ablities")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Moira);
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+		Set Primary Fire Enabled(Event Player, True);
+		Set Secondary Fire Enabled(Event Player, True);
+	}
+}
+
+rule("Symettra: Reset cooldown on Teleporter")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Symmetra;
+	}
+
+	conditions
+	{
+		Ability Cooldown(Event Player, Button(Ability 2)) > 0;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Ability 2), 0);
+	}
+}
+
+rule("Symettra: Heal for 75% of damage done")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Symmetra;
+	}
+
+	actions
+	{
+		Heal(All Players(Team Of(Event Player)), Event Player, Event Damage / 4 * 3);
+	}
+}
+
+rule("Symettra: Allow player to TP to Sym while ult is up and give them a respwan time of 2 seconds")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Players On Hero(Hero(Symmetra), Team Of(Event Player))) == True;
+	}
+
+	actions
+	{
+		If(Is In Spawn Room(Event Player) == True && Hero Of(Event Player) != Hero(Symmetra) && Is Button Held(Event Player, Button(
+			Interact)) == True);
+			Teleport(Event Player, Players On Hero(Hero(Symmetra), Team Of(Event Player)));
+		End;
+		If(Is Dead(Event Player) == True);
+			Wait(2, Ignore Condition);
+			Respawn(Event Player);
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Symettra: Push up if facing down and fireing")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Symmetra;
+	}
+
+	conditions
+	{
+		Is In Air(Event Player) == True;
+		Vertical Facing Angle Of(Event Player) >= 70;
+		Is Button Held(Event Player, Button(Jump)) == True;
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Altitude Of(Event Player) < 10;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up, 1, To World, Incorporate Contrary Motion);
+		Wait(0.050, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Echo: Fly Init By Author")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Echo;
+	}
+
+	conditions
+	{
+		Event Player.hero == False;
+	}
+
+	actions
+	{
+		Event Player.hero = True;
+		Set Gravity(Event Player, False);
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, False);
+	}
+}
+
+rule("Echo: Flying Throttle By Author")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Echo;
+	}
+
+	conditions
+	{
+		Event Player.hero == True;
+		(First Of(Throttle Of(Event Player)) || Is Button Held(Event Player, Button(Jump)) != Is Button Held(Event Player, Button(Crouch)))
+			== True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up * Is Button Held(Event Player, Button(Jump)) + Down * Is Button Held(Event Player, Button(Crouch))
+			+ Vector(X Component Of(Throttle Of(Event Player)), Z Component Of(Throttle Of(Event Player)) * Sine From Degrees(
+			Null - Vertical Facing Angle Of(Event Player)), Z Component Of(Throttle Of(Event Player)) * Cosine From Degrees(
+			Vertical Facing Angle Of(Event Player))), (Is Button Held(Event Player, Button(Ability 1)) ? 11 : 5.500) * Min(True,
+			Absolute Value(Is Button Held(Event Player, Button(Jump)) - Is Button Held(Event Player, Button(Crouch))) + Distance Between(
+			Throttle Of(Event Player), Up + Down)), To Player, Cancel Contrary Motion);
+		Wait(False, Ignore Condition);
+		Loop If Condition Is True;
+		If(Hero Of(Event Player) == Hero(Echo) && Event Player.hero == True);
+			Apply Impulse(Event Player, Backward, 0.001, To World, Cancel Contrary Motion);
+			Apply Impulse(Event Player, Down, 0.001, To World, Cancel Contrary Motion);
+			Apply Impulse(Event Player, Forward, 0.001, To World, Cancel Contrary Motion);
+			Apply Impulse(Event Player, Left, 0.001, To World, Cancel Contrary Motion);
+			Apply Impulse(Event Player, Right, 0.001, To World, Cancel Contrary Motion);
+			Apply Impulse(Event Player, Up, 0.001, To World, Cancel Contrary Motion);
+		End;
+	}
+}
+
+rule("Echo: Disable flight when not playing echo")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Echo);
+		Event Player.hero == True;
+	}
+
+	actions
+	{
+		Event Player.hero = False;
+		Set Gravity(Event Player, 100);
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+		Set Secondary Fire Enabled(Event Player, True);
+	}
+}
+
+rule("Echo: Disable everything while flying fast")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Echo;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+	}
+
+	actions
+	{
+		Set Primary Fire Enabled(Event Player, False);
+		Disallow Button(Event Player, Button(Ability 2));
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Primary Fire Enabled(Event Player, True);
+		Allow Button(Event Player, Button(Ability 2));
+	}
+}
+
+rule("Echo: Self heal passive")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Echo;
+	}
+
+	actions
+	{
+		If(Event Player.echoIsLinked == True);
+			Start Heal Over Time(Event Player, Event Player, 1, 50);
+		Else;
+			Start Heal Over Time(Event Player, Event Player, 1, 25);
+		End;
+		Wait(1, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Echo: Reassign beam to secondary")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Echo;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Ability Cooldown(Event Player, Button(Ability 2)) <= 0;
+		Is Button Held(Event Player, Button(Ability 1)) == False;
+		Is Reloading(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Ability 2 Enabled(Event Player, True);
+		Set Damage Dealt(Event Player, 0);
+		Press Button(Event Player, Button(Ability 2));
+		While(Ammo(Event Player, 0) > 0);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) - 1);
+			Heal(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.echoHealBeamDistance, All Players(
+				Team Of(Event Player)), Event Player, False), Event Player, Normalized Health(Ray Cast Hit Player(Eye Position(Event Player),
+				Eye Position(Event Player) * Event Player.echoHealBeamDistance, All Players(Team Of(Event Player)), Event Player, False))
+				? 24 : 6);
+			disabled Destroy All Effects;
+			disabled Create Effect(All Players(All Teams), Sphere, Color(White), Ray Cast Hit Position(Eye Position(Event Player), Eye Position(
+				Event Player) * Event Player.echoHealBeamDistance, All Players(Team Of(Event Player)), Event Player, False), 0.500,
+				Visible To Position and Radius);
+			Wait(0.166, Ignore Condition);
+		End;
+		Set Ability 2 Enabled(Event Player, False);
+		Set Damage Dealt(Event Player, 100);
+		disabled Destroy All Effects;
+	}
+}
+
+rule("Echo: Create text while sprinting.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Echo;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+	}
+
+	actions
+	{
+		Play Effect(Event Player, Debuff Impact Sound, Color(White), Event Player, 100);
+	}
+}
+
+rule("Somba: Make playes withing 6m invisable while she's invisable")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sombra;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 80);
+		Set Invisible(Players Within Radius(Event Player, 6, Team Of(Event Player), Surfaces), Enemies);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Color(Purple), Event Player, 6, Visible To Position and Radius);
+		Create Effect(All Players(Team Of(Event Player)), Light Shaft, Color(Purple), Players Within Radius(Event Player, 6, Team Of(
+			Event Player), Off), 1, Visible To Position and Radius);
+		Wait(0.250, Ignore Condition);
+		Destroy All Effects;
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+		Set Invisible(All Living Players(Team Of(Event Player)), None);
+	}
+}
+
+rule("Somba: Friendly hack")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sombra;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Ability Cooldown(Event Player, Button(Secondary Fire)) == 0;
+	}
+
+	actions
+	{
+		Heal(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange, All Players(
+			Team Of(Event Player)), Event Player, False), Event Player, 50);
+		Start Heal Over Time(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange,
+			All Players(Team Of(Event Player)), Event Player, False), Event Player, 6, 100 / 6);
+		Remove Health Pool From Player(Last Created Health Pool);
+		Add Health Pool To Player(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player)
+			* Event Player.sombraHackRange, All Players(Team Of(Event Player)), Event Player, False), Shields, 50, False, True);
+		Clear Status(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange,
+			All Players(Team Of(Event Player)), Event Player, False), Hacked);
+		Clear Status(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange,
+			All Players(Team Of(Event Player)), Event Player, False), Burning);
+		Clear Status(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange,
+			All Players(Team Of(Event Player)), Event Player, False), Asleep);
+		Clear Status(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange,
+			All Players(Team Of(Event Player)), Event Player, False), Rooted);
+		If(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.sombraHackRange, All Players(Team Of(
+			Event Player)), Event Player, False) == True);
+			Set Ability Cooldown(Event Player, Button(Secondary Fire), 4);
+		End;
+	}
+}
+
+rule("Somba: EMP applies friendly hack")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sombra;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Heal(Players Within Radius(Event Player, 15, Team Of(Event Player), Surfaces), Event Player, 100);
+		Start Heal Over Time(Players Within Radius(Event Player, 15, All Teams, Off), Event Player, 6, 200 / 6);
+		Add Health Pool To Player(Players Within Radius(Event Player, 15, Team Of(Event Player), Surfaces), Shields, 100, False, True);
+		Clear Status(Players Within Radius(Event Player, 15, Team Of(Event Player), Surfaces), Hacked);
+		Clear Status(Players Within Radius(Event Player, 15, Team Of(Event Player), Surfaces), Burning);
+		Clear Status(Players Within Radius(Event Player, 15, Team Of(Event Player), Surfaces), Asleep);
+		Clear Status(Players Within Radius(Event Player, 15, Team Of(Event Player), Surfaces), Rooted);
+	}
+}
+
+rule("Sigma: Remove gravity while playing Sigma")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 0);
+		Start Scaling Barriers(Event Player, 1.500, True);
+	}
+}
+
+rule("Sigma: Remove cooldown on barrier")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Ability Cooldown(Event Player, Button(Secondary Fire)) > 0;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Secondary Fire), 0.250);
+	}
+}
+
+rule("Sigma: Apply facing direction impulse when firing primary")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+		Is Button Held(Event Player, Button(Secondary Fire)) == False;
+		Is Button Held(Event Player, Button(Jump)) == True;
+		Is Using Ability 1(Event Player) == False;
+		Is Using Ability 2(Event Player) == False;
+		Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Facing Direction Of(Event Player), 15, To World, Incorporate Contrary Motion);
+		Wait(1.500, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Sigma: Pull enimies towards player while using kinetic grasp")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Players Within Radius(Eye Position(Event Player), 1000, Opposite Team Of(Team Of(Event Player)), Off),
+			Facing Direction Of(Event Player), -1, To World, Incorporate Contrary Motion);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Sigma: Apply opposite facing direction impulse when using ablity 2")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(0.650, Ignore Condition);
+		Apply Impulse(Event Player, Facing Direction Of(Event Player), -25, To World, Cancel Contrary Motion);
+		disabled Loop If Condition Is True;
+	}
+}
+
+rule("Sigma: Slowfall on CTRL")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Crouch)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Down, 1, To World, Incorporate Contrary Motion);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Sigma: Remove gravity on hacked")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Has Status(Event Player, Hacked) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 0);
+	}
+}
+
+rule("Sigma: Remove gravity on knocked down")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Has Status(Event Player, Knocked Down) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 0);
+	}
+}
+
+rule("Sigma: Remove gravity on asleep")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Has Status(Event Player, Asleep) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 0);
+	}
+}
+
+rule("Sigma: Remove gravity on fozen")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Has Status(Event Player, Frozen) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 0);
+	}
+}
+
+rule("Sigma: Remove gravity on rooted")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Has Status(Event Player, Stunned) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 0);
+	}
+}
+
+rule("Sigma: Remove gravity on stunned")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sigma;
+	}
+
+	conditions
+	{
+		Has Status(Event Player, Stunned) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 0);
+	}
+}
+
+rule("Sigma: Reapply gravity while not playing Sigma")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Sigma);
+		Hero Of(Event Player) != Hero(Echo);
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("Sigma: Stop scailing barriers while not playing Sigma")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Sigma);
+	}
+
+	actions
+	{
+		Stop Scaling Barriers(Event Player);
+	}
+}
+
+rule("Winston: Reset cooldown on jump pack if on ground")
+{
+	event
+	{
+		Player Earned Elimination;
+		All;
+		Winston;
+	}
+
+	conditions
+	{
+		Ability Cooldown(Event Player, Button(Ability 1)) > 0;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Ability 1), 0);
+	}
+}
+
+rule("Winston: Reset bubble on cooldown")
+{
+	event
+	{
+		Player Earned Elimination;
+		All;
+		Winston;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Ability 1), 0);
+	}
+}
+
+rule("Winston: Charge ult on doing knockback")
+{
+	event
+	{
+		Player Dealt Knockback;
+		All;
+		Winston;
+	}
+
+	actions
+	{
+		Set Ultimate Charge(Event Player, Ultimate Charge Percent(Event Player) + 1);
+	}
+}
+
+disabled rule("Winston: wall climb test")
+{
+	event
+	{
+		Player Dealt Knockback;
+		All;
+		Winston;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+		Is Button Held(Event Player, Button(Jump)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up, 10, To World, Cancel Contrary Motion);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Tracer: Reset cooldowns on elimination")
+{
+	event
+	{
+		Player Earned Elimination;
+		All;
+		Tracer;
+	}
+
+	actions
+	{
+		Set Ability Charge(Event Player, Button(Ability 1), 3);
+		Set Ability Cooldown(Event Player, Button(Ability 2), 0);
+	}
+}
+
+rule("Tracer: Check if jumped")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Altitude Of(Event Player) > 0.800;
+		Is Button Held(Event Player, Button(Jump)) == False;
+	}
+
+	actions
+	{
+		Event Player.tracerV_BlinkAllowed = True;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Event Player.tracerV_BlinkAllowed = False;
+	}
+}
+
+rule("Tracer: Blink up on double jump")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Jump)) == True;
+		Event Player.tracerV_BlinkAllowed == True;
+		Ability Charge(Event Player, Button(Ability 1)) > 0;
+	}
+
+	actions
+	{
+		Event Player.tracerBlinkPos = Ray Cast Hit Position(Position Of(Event Player), Vector(X Component Of(Position Of(Event Player)),
+			Y Component Of(Position Of(Event Player)) + 7.500, Z Component Of(Position Of(Event Player))), Null, All Players(All Teams),
+			False);
+		Wait(0.050, Ignore Condition);
+		Press Button(Event Player, Button(Ability 1));
+		Wait(0.050, Ignore Condition);
+		If(Y Component Of(Event Player.tracerBlinkPos) < Y Component Of(Eye Position(Event Player)) + 7.500);
+			Teleport(Event Player, Vector(X Component Of(Event Player.tracerBlinkPos), 1.750 - Y Component Of(Event Player.tracerBlinkPos),
+				Z Component Of(Event Player.hero)));
+		Else;
+			Teleport(Event Player, Event Player.tracerBlinkPos);
+		End;
+	}
+}
+
+disabled rule("Tracer: Blink up on double jump")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Jump)) == True;
+		Event Player.tracerV_BlinkAllowed == True;
+		Ability Charge(Event Player, Button(Ability 1)) > 0;
+	}
+
+	actions
+	{
+		Event Player.tracerBlinkPos = Position Of(Event Player);
+		Wait(0.025, Ignore Condition);
+		Press Button(Event Player, Button(Ability 1));
+		Wait(0.025, Ignore Condition);
+		Teleport(Event Player, Event Player.tracerBlinkPos);
+		Set Gravity(Event Player, 300);
+		Apply Impulse(Event Player, Up, 10, To World, Incorporate Contrary Motion);
+		Wait(0.075, Ignore Condition);
+		Set Gravity(Event Player, 100);
+	}
+}
+
+disabled rule("Tracer: Reset gravity when on ground")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Tracer;
+	}
+
+	conditions
+	{
+		Is On Ground(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("Mechcree: IF player.fireingPrimary() THEN player.fireSecondary();")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Cassidy;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Is Button Held(Event Player, Button(Crouch)) == False;
+	}
+
+	actions
+	{
+		Set Secondary Fire Enabled(Event Player, True);
+		Press Button(Event Player, Button(Secondary Fire));
+	}
+}
+
+rule("Mechcree: WHILE player.isCrouching")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Cassidy;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Crouch)) == True;
+		Is Firing Primary(Event Player) == False;
+		Is Firing Secondary(Event Player) == False;
+		Is Using Ability 1(Event Player) == False;
+		Is Using Ability 2(Event Player) == False;
+		Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Invisible(Event Player, Enemies);
+		Set Primary Fire Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, False);
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		disabled Set Ultimate Ability Enabled(Event Player, False);
+		Create Effect(Event Player, Light Shaft, Color(Purple), Event Player, 1, Visible To Position and Radius);
+		Create Effect(Event Player, Light Shaft, Color(Purple), Event Player, 1, Visible To Position and Radius);
+		Create Effect(Event Player, Light Shaft, Color(Purple), Event Player, 1, Visible To Position and Radius);
+		Create Effect(Event Player, Light Shaft, Color(Purple), Event Player, 1, Visible To Position and Radius);
+		Create Effect(Event Player, Light Shaft, Color(Purple), Event Player, 1, Visible To Position and Radius);
+	}
+}
+
+rule("Mechcree: | DO player.setStatus(invisable);")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Cassidy;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Crouch)) == False;
+	}
+
+	actions
+	{
+		Set Invisible(Event Player, None);
+		Set Primary Fire Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, True);
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+		disabled Set Ultimate Ability Enabled(Event Player, True);
+		Destroy All Effects;
+	}
+}
+
+rule("Mechcree: Enable primary if primary should be enable when not playing the hero")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Cassidy);
+		Hero Of(Event Player) != Hero(Moira);
+	}
+
+	actions
+	{
+		Set Primary Fire Enabled(Event Player, True);
+	}
+}
+
+rule("Reinhardt: Start")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	actions
+	{
+		Add Health Pool To Player(Event Player, Armor, 150, True, True);
+	}
+}
+
+rule("Reinhardt: Sheild Hop Start")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		disabled Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Is Firing Secondary(Event Player) == True;
+		Is Button Held(Event Player, Button(Jump)) == True;
+		Is In Air(Event Player) == True;
+		Event Player.reinSheildHopped == False;
+		Is Using Ability 1(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 215);
+		Event Player.reinSheildHopped = True;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("Reinhardt: Stop Hop")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == False;
+		Is Button Held(Event Player, Button(Jump)) == False;
+		Is In Air(Event Player) == False;
+		Event Player.reinSheildHopped == True;
+	}
+
+	actions
+	{
+		Event Player.reinSheildHopped = False;
+	}
+}
+
+rule("Rinehardt: Create body sheild")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Reload)) == True;
+		Ability Cooldown(Event Player, Button(Secondary Fire)) == 0;
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Event Player.reinhardtBodyShieldEnabled == False);
+			Add Health Pool To Player(Event Player, Shields, 2000, True, True);
+			Event Player.reinhardtBodyShieldID = Last Created Health Pool;
+			Set Secondary Fire Enabled(Event Player, False);
+			Set Ability Cooldown(Event Player, Button(Secondary Fire), 4);
+			Event Player.reinhardtBodyShieldEnabled = True;
+		Else If(Event Player.reinhardtBodyShieldEnabled == True);
+			Remove Health Pool From Player(Event Player.reinhardtBodyShieldID);
+			Set Secondary Fire Enabled(Event Player, True);
+			Set Ability Cooldown(Event Player, Button(Secondary Fire), 4);
+			Event Player.reinhardtBodyShieldEnabled = False;
+		End;
+	}
+}
+
+rule("Reinhardt: Remove body shield on death")
+{
+	event
+	{
+		Player Died;
+		All;
+		Reinhardt;
+	}
+
+	actions
+	{
+		Remove Health Pool From Player(Event Player.reinhardtBodyShieldID);
+		Set Secondary Fire Enabled(Event Player, True);
+		Set Ability Cooldown(Event Player, Button(Secondary Fire), 4);
+		Event Player.reinhardtBodyShieldEnabled = False;
+	}
+}
+
+rule("Reinhardt: Damage player on firestrike use")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 2)) == True;
+		Health Of Type(Event Player, Armor) >= 25;
+	}
+
+	actions
+	{
+		Damage(Event Player, Event Player, 25);
+		disabled Wait(0.480, Ignore Condition);
+		disabled Wait(0.640, Ignore Condition);
+		Wait(1, Ignore Condition);
+	}
+}
+
+rule("Reinhardt: Damage player while using charge")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		disabled Is Button Held(Event Player, Button(Ability 1)) == True;
+		Health Of Type(Event Player, Armor) >= 25;
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Damage(Event Player, Event Player, 6.250);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Reinhardt: Charge while holding charge key")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == False;
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Cancel Primary Action(Event Player);
+	}
+}
+
+rule("Reinhardt: Allow jump while charging")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Jump)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up, 5, To World, Incorporate Contrary Motion);
+		Wait(0.250, Ignore Condition);
+		Wait Until(Is Button Held(Event Player, Button(Jump)) == False, 3);
+	}
+}
+
+rule("Reinhardt: Controlled charge")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		"Credit: Lotto#4761 - 	Reinhardt Charge Code"
+		Event Player.reinhardtChargeDirection = Horizontal Facing Angle Of(Event Player);
+		Wait(0.016, Ignore Condition);
+		"steering right"
+		If(Angle Difference(Horizontal Facing Angle Of(Event Player), Event Player.reinhardtChargeDirection) > 0);
+			If(Is In Air(Event Player));
+				Start Accelerating(Event Player, Right, 100, 4, To Player, Direction Rate and Max Speed);
+			Else;
+				Start Accelerating(Event Player, Right, 500, 11.500, To Player, Direction Rate and Max Speed);
+			End;
+		Else If(Angle Difference(Horizontal Facing Angle Of(Event Player), Event Player.reinhardtChargeDirection) < 0);
+			If(Is In Air(Event Player));
+				Start Accelerating(Event Player, Left, 100, 4, To Player, Direction Rate and Max Speed);
+			Else;
+				Start Accelerating(Event Player, Left, 500, 11.500, To Player, Direction Rate and Max Speed);
+			End;
+		Else;
+			Stop Accelerating(Event Player);
+		End;
+		Loop If Condition Is True;
+		Stop Accelerating(Event Player);
+	}
+}
+
+rule("Reinhardt: Disable abilites when armour is too low")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Health Of Type(Event Player, Armor) < 25;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+	}
+}
+
+rule("Reinhardt: Increase control while charging")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Reinhardt;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Event Player.reinhardtCurrentChargeAngle = Horizontal Facing Angle Of(Event Player);
+		Wait(0.250, Ignore Condition);
+	}
+}
+
+rule("Torbjorn: Reduce cooldown on Overload when dealing damage while in Overload")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Torbjörn;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+		Is Firing Primary(Event Player) == True;
+	}
+
+	actions
+	{
+		Event Player.torbOverloadCD = Event Player.torbOverloadCD + 1.500;
+		Set Status(Victim, Event Player, Burning, 2);
+	}
+}
+
+rule("Torbjorn: Reset cooldown of Overload if not 0 and variable cooldown is 0")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Torbjörn;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Ability 2), Ability Cooldown(Event Player, Button(Ability 2))
+			- Event Player.torbOverloadCD);
+		Event Player.torbOverloadCD = 0;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+disabled rule("Torbjorn: Jump pad")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Torbjörn;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+	}
+
+	actions
+	{
+		Create Effect(All Players(Team Of(Event Player)), Ring, Color(Team 1), Event Player, 1, None);
+		Event Player.torbJumpPads = Append To Array(Event Player.torbJumpPads, Array(Last Created Entity, World Vector Of(Event Player,
+			Event Player, Rotation And Translation)));
+	}
+}
+
+rule("Torbjorn: Ultamate PT1")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Torbjörn;
+	}
+
+	conditions
+	{
+		Ultimate Charge Percent(Event Player) == 100;
+	}
+
+	actions
+	{
+		Disallow Button(Event Player, Button(Ultimate));
+	}
+}
+
+rule("Torbjorn: Ultamate")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Torbjörn;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ultimate)) == True;
+		Ultimate Charge Percent(Event Player) == 100;
+	}
+
+	actions
+	{
+		Set Ultimate Charge(Event Player, 0);
+		Allow Button(Event Player, Button(Ultimate));
+		Set Ultimate Charge(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * Event Player.torbUltRange,
+			All Players(Team Of(Event Player)), Event Player, False), 100);
+	}
+}
+
+rule("Hanzo: Reset leap when on ground")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Hanzo;
+	}
+
+	conditions
+	{
+		Is On Ground(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Jump), 0);
+	}
+}
+
+rule("Hanzo: Reset leap when on wall")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Hanzo;
+	}
+
+	conditions
+	{
+		Is On Wall(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability Cooldown(Event Player, Button(Jump), 0);
+	}
+}
+
+rule("Baptiste: Increase move speed while in air")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+		Is In Air(Event Player) == True;
+		Is Dead(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 200);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+disabled rule("Baptiste: Move forward on melee while in air")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+		Is In Air(Event Player) == True;
+		Event Player.bapMeleeBoost == False;
+		Is Dead(Event Player) == False;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Forward, 30, To Player, Cancel Contrary Motion);
+		Event Player.bapMeleeBoost = True;
+	}
+}
+
+disabled rule("Baptiste: Reset melee movement when on ground")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Is On Ground(Event Player) == True;
+		Event Player.bapMeleeBoost == True;
+	}
+
+	actions
+	{
+		Event Player.bapMeleeBoost = False;
+	}
+}
+
+rule("Baptiste: Heal for 25 on regen burst")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Baptiste;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Heal(Players Within Radius(Event Player, 10, All Teams, Surfaces And Enemy Barriers), Event Player, 25);
+	}
+}
+
+disabled rule("Ana: Remove sleep on sleep dart")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+	}
+}
+
+rule("Ana: Remove sleep on sleep dart")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ana;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Is In Spawn Room(Event Player) == False;
+	}
+
+	actions
+	{
+		Heal(Players in View Angle(Event Player, Team Of(Event Player), 2.500), Null, 40);
+	}
+}
+
+rule("Ana: If healing self half cooldown of nade")
+{
+	event
+	{
+		Player Received Healing;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Event Ability == Button(Ability 2);
+		Hero Of(Healer) == Hero(Ana);
+	}
+
+	actions
+	{
+		Start Heal Over Time(Event Player, Event Player, 10, 100);
+	}
+}
+
+rule("Pharah: Disable jumpjets if fuel less than half")
+{
+	event
+	{
+		Player Received Healing;
+		All;
+		Pharah;
+	}
+
+	conditions
+	{
+		Ability Resource(Event Player, Button(Primary Fire)) < 50;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, False);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Ability 1 Enabled(Event Player, True);
+	}
+}
+
+rule("Mei: Start scailing player if Mei")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	actions
+	{
+		Start Scaling Player(Event Player, 1.200, True);
+	}
+}
+
+rule("Mei: Ice Skate")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mei;
+	}
+
+	conditions
+	{
+		Vertical Facing Angle Of(Event Player) >= 7.500;
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Ammo(Event Player, 0) != 0;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 175);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("Mei: Stop scailing player if not Mei")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Mei);
+	}
+
+	actions
+	{
+		Stop Scaling Player(Event Player);
+	}
+}
+
+rule("Bastion: Start scailing player if Bastion")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Bastion;
+	}
+
+	actions
+	{
+		Start Scaling Player(Event Player, 1.400, True);
+		Disallow Button(Event Player, Button(Jump));
+	}
+}
+
+rule("Bastion: Use ult if not in use.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Bastion;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Press Button(Event Player, Button(Ultimate));
+		Wait(0.250, Ignore Condition);
+		Loop If(Is Using Ultimate(Event Player) == False);
+	}
+}
+
+rule("Bastion: Increase speed on shift.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Bastion;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+	}
+
+	actions
+	{
+		If(Is Button Held(Event Player, Button(Secondary Fire)) == True);
+			Set Move Speed(Event Player, 100);
+		Else;
+			Set Move Speed(Event Player, 175);
+		End;
+		Disallow Button(Event Player, Button(Primary Fire));
+		Event Player.bastionSprinting = True;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+		Allow Button(Event Player, Button(Primary Fire));
+		Event Player.bastionSprinting = False;
+	}
+}
+
+rule("Bastion: Reuse ultamate if it runs out.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Bastion;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Damage Received(Event Player, 0);
+		Set Ultimate Charge(Event Player, 100);
+		Press Button(Event Player, Button(Ultimate));
+		Set Damage Received(Event Player, 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Bastion: Create text while sprinting.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Bastion;
+	}
+
+	conditions
+	{
+		Event Player.bastionSprinting == True;
+	}
+
+	actions
+	{
+		Create HUD Text(Event Player, Custom String("WARNING: SPRINTING!"), Null, Null, Top, 1, Color(Red), Color(White), Color(White),
+			Visible To and String, Default Visibility);
+		Event Player.bastionEchoSprintingText = Array(Last Text ID);
+		Create HUD Text(Event Player, Custom String("Tank Cannon Disabled - Self Healing Will Slow Movement"), Null, Null, Top, 2, Color(
+			White), Color(White), Color(White), Visible To and String, Default Visibility);
+		Modify Player Variable(Event Player, bastionEchoSprintingText, Append To Array, Last Text ID);
+		Play Effect(Event Player, Debuff Impact Sound, Color(White), Event Player, 100);
+	}
+}
+
+rule("Bastion: Destroy text when not sprinting.")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Bastion;
+	}
+
+	conditions
+	{
+		Event Player.bastionSprinting == False;
+	}
+
+	actions
+	{
+		Destroy HUD Text(Event Player.bastionEchoSprintingText[0]);
+		Destroy HUD Text(Event Player.bastionEchoSprintingText[1]);
+		Event Player.bastionEchoSprintingText = 0;
+	}
+}
+
+rule("Bastion: Stop scailing player if not Bastion")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Bastion);
+	}
+
+	actions
+	{
+		Stop Scaling Player(Event Player);
+		Allow Button(Event Player, Button(Jump));
+	}
+}
+
+rule("Doomfist: Start scailing player if Doomfist")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	actions
+	{
+		Start Scaling Player(Event Player, 1.300, False);
+	}
+}
+
+rule("Doomfist: Rocket Punch uses damage bonus")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	conditions
+	{
+		Ability Cooldown(Event Player, Button(Secondary Fire)) == True;
+	}
+
+	actions
+	{
+		Event Player.doomDamageBonus -= Event Player.doomAbilityEnergyCost;
+		If(Ammo(Event Player, 0) < 4);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+		End;
+	}
+}
+
+rule("Doomfist: Uppercut uses damage bonus")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	conditions
+	{
+		Ability Cooldown(Event Player, Button(Ability 1)) == True;
+	}
+
+	actions
+	{
+		Event Player.doomDamageBonus -= Event Player.doomAbilityEnergyCost;
+		If(Ammo(Event Player, 0) < 4);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+		End;
+	}
+}
+
+rule("Doomfist: Sizemic Slam uses damage bonus")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	conditions
+	{
+		Ability Cooldown(Event Player, Button(Ability 2)) == True;
+	}
+
+	actions
+	{
+		Event Player.doomDamageBonus -= Event Player.doomAbilityEnergyCost;
+		If(Ammo(Event Player, 0) < 4);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+		End;
+	}
+}
+
+rule("Doomfist: Heal and give sheild for damage dealt")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Doomfist;
+	}
+
+	conditions
+	{
+		disabled Event Damage == True;
+	}
+
+	actions
+	{
+		Heal(Event Player, Event Player, Max Health(Event Player) * Event Player.doomShieldHealthBonus);
+		Add Health Pool To Player(Event Player, Shields, Max Health(Event Player) * (Event Player.doomShieldHealthBonus / 6), False, True);
+	}
+}
+
+rule("Doomfist: Give energy on primary use")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+	}
+
+	actions
+	{
+		Event Player.doomDamageBonus += Event Player.doomDamageBonusMax / 4;
+	}
+}
+
+rule("Doomfist: Destroy hud text on death and Damage Bonus + Tracker")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	actions
+	{
+		If(Is Dead(Event Player) == True);
+			Destroy All Progress Bar HUD Text;
+		Else;
+			Create Progress Bar HUD Text(Event Player, Event Player.doomDamageBonus, Custom String("Damage Bonus"), Top, 0, Color(Yellow),
+				Color(Yellow), Visible To Values and Color, Default Visibility);
+			Chase Player Variable Over Time(Event Player, doomDamageBonus, 100, 4, Destination and Duration);
+			Set Damage Dealt(Event Player, Event Player.doomDamageBonus * 2);
+		End;
+	}
+}
+
+rule("Doomfist: Stop scailing player and destroy hud text if not Doomfist")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Doomfist;
+	}
+
+	actions
+	{
+		Stop Scaling Player(Event Player);
+		Destroy All Progress Bar HUD Text;
+	}
+}
+
+rule("Zenyatta: Hover while holding space")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Zenyatta;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Jump)) == True;
+	}
+
+	actions
+	{
+		Event Player.zenFlightTime = 0;
+		While(Is Button Held(Event Player, Button(Jump)) == True && Event Player.zenFlightTime < 3);
+			Apply Impulse(Event Player, Up, 1, To World, Incorporate Contrary Motion);
+			Wait(0.050, Ignore Condition);
+			Event Player.zenFlightTime += 0.050;
+		End;
+	}
+}
+
+rule("Ball: Implement Robot form changes when starting playing Ball")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Wrecking Ball;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 50);
+		Set Jump Enabled(Event Player, False);
+	}
+}
+
+rule("Ball: Ball Form Code")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Wrecking Ball;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Is Button Held(Event Player, Button(Ability 1)) == True || Is Button Held(Event Player, Button(Secondary Fire)) == True);
+			Event Player.ballHealthNomalized = (Health Of Type(Event Player, Health) + Health Of Type(Event Player, Armor)) / 2;
+			Set Max Health(Event Player, 50);
+			Set Move Speed(Event Player, Event Player.ballUniVar);
+			Wait(0.250, Ignore Condition);
+			Destroy All Effects;
+			Set Player Health(Event Player, Event Player.ballHealthNomalized);
+			Set Jump Enabled(Event Player, True);
+			Add Health Pool To Player(Event Player, Shields, Health Of Type(Event Player, Shields) * 2, False, True);
+		End;
+	}
+}
+
+rule("Ball: Robot Form Code")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Wrecking Ball;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == False;
+	}
+
+	actions
+	{
+		If(Is Button Held(Event Player, Button(Ability 1)) == True || Is Button Held(Event Player, Button(Primary Fire)) == True);
+			disabled Event Player.ballSheildsAmount = Health Of Type(Event Player, Shields);
+			disabled Remove Health Pool From Player(Health Of Type(Event Player, Shields));
+			Event Player.ballHealthNomalized = (Health Of Type(Event Player, Health) + Health Of Type(Event Player, Armor)) * 2;
+			Set Max Health(Event Player, 100);
+			Set Move Speed(Event Player, Event Player.ballUniVar / 2);
+			Wait(0.250, Ignore Condition);
+			Set Player Health(Event Player, Event Player.ballHealthNomalized);
+			Set Jump Enabled(Event Player, False);
+			Event Player.ballSheildsArrayIndex = 0;
+			disabled While(Event Player.ballSheildsArrayIndex <= Count Of(Event Player.ballSheildsArrayIndex));
+			disabled Add Health Pool To Player(Event Player, Shields, Event Player.ballSheildsArray[Event Player.ballSheildsArrayIndex], False, True);
+			disabled End;
+			Add Health Pool To Player(Event Player, Shields, Health Of Type(Event Player, Shields), False, True);
+		End;
+		Event Player.ballSheildsArrayIndex = 0;
+		disabled While(Event Player.ballSheildsArrayIndex <= Count Of(Event Player.ballSheildsArrayIndex));
+		disabled Remove Health Pool From Player(Event Player.ballSheildsArray[Event Player.ballSheildsArrayIndex]);
+		disabled End;
+	}
+}
+
+rule("Ball: Add shields equil to speed when in ball form")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Wrecking Ball;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+		Is Moving(Event Player) == True;
+	}
+
+	actions
+	{
+		Add Health Pool To Player(Event Player, Shields, Speed Of(Event Player), False, True);
+		disabled Event Player.ballSheildsArray = Append To Array(Event Player.ballSheildsArray, Last Created Health Pool);
+		disabled Wait(1, Ignore Condition);
+		Wait(0.500, Ignore Condition);
+		disabled Loop If(Health Of Type(Event Player, Shields) <= 300);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Ball: Disable primary fire if looking at ball while he has sheilds")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Wrecking Ball;
+	}
+
+	conditions
+	{
+		Players in View Angle(Event Player, Opposite Team Of(Team Of(Event Player)), 30) == Hero(Wrecking Ball);
+	}
+
+	actions
+	{
+		Event Player.ballEnemySlot = Players On Hero(Hero(Wrecking Ball), Opposite Team Of(Team Of(Event Player)));
+		If(Players in View Angle(Event Player, Opposite Team Of(Team Of(Event Player)), 30) == Players In Slot(Event Player.ballEnemySlot,
+			All Teams));
+			If(Health Of Type(Players In Slot(Event Player.ballEnemySlot, All Teams), Shields) > 0);
+				Set Primary Fire Enabled(Event Player, False);
+			End;
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Primary Fire Enabled(Event Player, True);
+	}
+}
+
+rule("Ball: Remove Robot form changes when stoping playing Ball")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Wrecking Ball);
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+		Set Jump Enabled(Event Player, True);
+	}
+}
+
+rule("Genji: Use ult if not in use and set to correct value on revive")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		Press Button(Event Player, Button(Ultimate));
+		Wait(0.250, Ignore Condition);
+		Loop If(Is Using Ultimate(Event Player) == False);
+		If(Event Player.genjiUsingNewUlt == True);
+			Press Button(Event Player, Button(Ultimate));
+		End;
+	}
+}
+
+rule("Genji: Allow double jump if you are > 0.8 altitude, not holding jump button, and have double jumps")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Altitude Of(Event Player) > 0.800;
+		Is Button Held(Event Player, Button(Jump)) == False;
+		Event Player.genjiTripleJumpCount > 0;
+	}
+
+	actions
+	{
+		Event Player.genjiTripleJumpAllowed = True;
+	}
+}
+
+rule("Genji: Disallow double jump if you are out of jumps")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Event Player.genjiTripleJumpCount <= 0;
+	}
+
+	actions
+	{
+		Event Player.genjiTripleJumpAllowed = False;
+	}
+}
+
+rule("Genji: If you jump while in the air and double jump is allowed, double jump and consume a charge")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Event Player.genjiTripleJumpAllowed == True;
+		Is Button Held(Event Player, Button(Jump)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up, 10, To World, Cancel Contrary Motion);
+		Event Player.genjiTripleJumpCount -= 1;
+	}
+}
+
+rule("Genji: Touching the ground resets your jump count and disallows double jump")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is In Air(Event Player) != True;
+	}
+
+	actions
+	{
+		Event Player.genjiTripleJumpCount = 1;
+		Event Player.genjiTripleJumpAllowed = False;
+	}
+}
+
+rule("Genji: Wall cling")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is On Wall(Event Player) == True;
+		Is On Ground(Event Player) == False;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(2, 0, 0), All Players(All Teams), Event Player, True) == True;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(0, 0, 2), All Players(All Teams), Event Player, True) == True;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(-2, 0, 0), All Players(All Teams), Event Player, True)
+			== True;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(0, 0, -2), All Players(All Teams), Event Player, True)
+			== True;
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, False);
+		Set Gravity(Event Player, False);
+		If(Event Player.genjiAmmoAltTick == 1);
+			If(Ammo(Event Player, 0) + 1 <= 30);
+				Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+			End;
+			Event Player.genjiAmmoAltTick = 0;
+		Else If(Event Player.genjiAmmoAltTick == 0);
+			Event Player.genjiAmmoAltTick = 1;
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If(Hero Of(Event Player) == Hero(Genji) && Is Button Held(Event Player, Button(Secondary Fire)) == True);
+		Event Player.genjiTripleJumpCount = 1;
+		Set Move Speed(Event Player, 100);
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("Genji: Ammo Manager")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Ammo(Event Player, 0) < 31;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Ammo(Event Player, 0) >= 10);
+			Set Ability 1 Enabled(Event Player, True);
+		Else;
+			Set Ability 1 Enabled(Event Player, False);
+		End;
+		If(Ammo(Event Player, 0) >= 15);
+			Set Ability 2 Enabled(Event Player, True);
+		Else;
+			If(Is Using Ability 2(Event Player) == True);
+				Wait Until(Is Using Ability 2(Event Player) == False, 2);
+			End;
+			Set Ability 2 Enabled(Event Player, False);
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Genji: Primary fire on melee")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Press Button(Event Player, Button(Primary Fire));
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Genji: Cost for dash")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ammo(Event Player, 0, Ammo(Event Player, 0) - 10);
+	}
+}
+
+rule("Genji: Cost for reflect")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		disabled Event Player.genjiAmmoAltTick = Event Player.genjiAmmoAltTick - 50;
+		Set Ammo(Event Player, 0, Ammo(Event Player, 0) - 15);
+	}
+}
+
+rule("Genji: Leech")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Heal(Event Player, Event Player, Event Damage / 100 * Event Player.genjiLeechAmount);
+	}
+}
+
+rule("Genji: Builder")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Event Ability == Button(Ultimate));
+			If(Ammo(Event Player, 0) < 30 && Ammo(Event Player, 0) > 25);
+				Set Ammo(Event Player, 0, 30);
+			Else If(Ammo(Event Player, 0) + 5 <= 30);
+				Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 5);
+			End;
+		End;
+	}
+}
+
+rule("Genji: Grant 10 ammo on elimination")
+{
+	event
+	{
+		Player Earned Elimination;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Ammo(Event Player, 0) < 30 && Ammo(Event Player, 0) > 20);
+			Set Ammo(Event Player, 0, 30);
+		Else If(Ammo(Event Player, 0) + 10 <= 30);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 10);
+		End;
+	}
+}
+
+rule("Genji: Ult charger")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+		Is Using Ultimate(Event Player) == True;
+		Event Player.hero <= 100;
+	}
+
+	actions
+	{
+		If(Event Player.genjiUltCharge + 0.104 <= 100);
+			Event Player.genjiUltCharge = Event Player.genjiUltCharge + 0.104;
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Genji: Charge alt from damage")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Event Player.genjiUltCharge = Event Player.genjiUltCharge + 0.051 * Event Damage;
+	}
+}
+
+rule("Genji: Manage Ult")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ultimate)) == True;
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		If(Event Player.genjiUsingNewUlt == True);
+			Call Subroutine(Sub2_genjiStartUlt);
+		Else If(Event Player.genjiUsingNewUlt == False);
+			Call Subroutine(Sub1_globalReset);
+		End;
+	}
+}
+
+rule("Genji: Depleet ult charge while using")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Event Player.genjiUsingNewUlt == True;
+		Is Using Ultimate(Event Player) == True;
+		Event Player.hero >= 0;
+	}
+
+	actions
+	{
+		If(Event Player.genjiUltCharge - 0.416 >= 0);
+			Event Player.genjiUltCharge = Event Player.genjiUltCharge - 0.416;
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Genji: Stop ult on death")
+{
+	event
+	{
+		Player Died;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Call Subroutine(Sub2_genjiStartUlt);
+	}
+}
+
+rule("Genji: Track ult as variable")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ultimate Charge(Event Player, Event Player.genjiUltCharge);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+disabled rule("Genji: Set ult to last value on spawn")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		Has Spawned(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(2, Ignore Condition);
+		Set Ultimate Charge(Event Player, Event Player.genjiUltCharge);
+	}
+}
+
+disabled rule("D.Va: Hover on crouch")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Altitude Of(Event Player) > 0.800;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(2, 0, 0), All Players(All Teams), Event Player, True) == True;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(0, 0, 2), All Players(All Teams), Event Player, True) == True;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(-2, 0, 0), All Players(All Teams), Event Player, True)
+			== True;
+		disabled Ray Cast Hit Normal(Event Player, Position Of(Event Player) + Vector(0, 0, -2), All Players(All Teams), Event Player, True)
+			== True;
+		Is Button Held(Event Player, Button(Crouch)) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, False);
+		Set Gravity(Event Player, False);
+		Wait(0.250, Ignore Condition);
+		Play Effect(All Players(All Teams), Explosion Sound, Null, Event Player, 1);
+		Loop If(Hero Of(Event Player) == Hero(D.Va) && Is Button Held(Event Player, Button(Crouch)) == True);
+		Set Move Speed(Event Player, 100);
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("D.Va: Apply cost to boosters")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability Resource(Event Player, Button(Secondary Fire), Ability Resource(Event Player, Button(Secondary Fire)) - 3.703);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("D.Va: Apply cost to missles")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Ability Resource(Event Player, Button(Secondary Fire), Ability Resource(Event Player, Button(Secondary Fire)) - 3.703);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("D.Va: Dissallow ability use if resource too low")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		(Is Using Ability 1(Event Player) || Is Using Ability 2(Event Player)) == True;
+		Ability Resource(Event Player, Button(Secondary Fire)) <= 3.703;
+	}
+
+	actions
+	{
+		Cancel Primary Action(Event Player);
+		Set Ability 1 Enabled(Event Player, False);
+		Set Ability 2 Enabled(Event Player, False);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+	}
+}
+
+rule("D.Va: Increase move speed while on ground and firing in mech")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+		Is In Alternate Form(Event Player) == False;
+		Is On Ground(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 140);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("D.Va: Increase resouce when taking damage")
+{
+	event
+	{
+		Player Took Damage;
+		All;
+		D.Va;
+	}
+
+	actions
+	{
+		Set Ability Resource(Event Player, Button(Secondary Fire), Ability Resource(Event Player, Button(Secondary Fire))
+			+ Event Damage / 3);
+	}
+}
+
+rule("D.Va: Ignore Damage")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Crouch)) == True;
+		Health Of Type(Event Player, Shields) <= 175;
+	}
+
+	actions
+	{
+		If(Is In Alternate Form(Event Player) == False);
+			Set Ability Resource(Event Player, Button(Secondary Fire), Ability Resource(Event Player, Button(Secondary Fire)) - 3.703);
+			Add Health Pool To Player(Event Player, Shields, 3, False, True);
+		End;
+		Heal(Event Player, Null, 3);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("D.Va: Remove sprint if not Baby")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == False;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("D.Va: Remove sprint if not Baby D.Va")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(D.Va);
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 100);
+	}
+}
+
+rule("D.Va: Force eject passive on interact and crouch")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == False;
+		Is Button Held(Event Player, Button(Crouch)) == True;
+		Is Button Held(Event Player, Button(Interact)) == True;
+	}
+
+	actions
+	{
+		Event Player.dvaUltEjectValue = Health(Event Player) / 6;
+		Damage(Event Player, Null, 1000);
+		Wait(1.500, Ignore Condition);
+		Set Ultimate Charge(Event Player, Event Player.dvaUltEjectValue);
+	}
+}
+
+rule("Baby D.Va: Base sprint")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 150);
+	}
+}
+
+rule("Baby D.Va: Sprint")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+	}
+
+	actions
+	{
+		Set Move Speed(Event Player, 200);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 150);
+	}
+}
+
+rule("Baby D.Va: Allow double jump if you are > 0.8 altitude, not holding jump button, and have double jumps")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+		Altitude Of(Event Player) > 0.800;
+		Is Button Held(Event Player, Button(Jump)) == False;
+		Event Player.babyDVaTripleJumpCount > 0;
+	}
+
+	actions
+	{
+		Event Player.babyDVaTripleJumpAllowed = True;
+	}
+}
+
+rule("Baby D.Va: Disallow double jump if you are out of jumps")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+		Event Player.babyDVaTripleJumpCount <= 0;
+	}
+
+	actions
+	{
+		Event Player.babyDVaTripleJumpAllowed = False;
+	}
+}
+
+rule("Baby D.Va: If you jump while in the air and double jump is allowed, double jump and consume a charge")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+		Event Player.babyDVaTripleJumpAllowed == True;
+		Is Button Held(Event Player, Button(Jump)) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Up, 10, To World, Cancel Contrary Motion);
+		Event Player.babyDVaTripleJumpCount -= 1;
+	}
+}
+
+rule("Baby D.Va: Touching the ground resets your jump count and disallows double jump")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		D.Va;
+	}
+
+	conditions
+	{
+		Is In Alternate Form(Event Player) == True;
+		Is In Air(Event Player) != True;
+	}
+
+	actions
+	{
+		Event Player.babyDVaTripleJumpCount = 1;
+		Event Player.babyDVaTripleJumpAllowed = False;
+	}
+}
+
+rule("Lucio: Disable basline aura when switching onto lucio")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lúcio;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, False);
+		Set Secondary Fire Enabled(Event Player, False);
+		disabled Set Max Ammo(Event Player, 0, 4);
+		disabled Set Ammo(Event Player, 0, 4);
+		disabled Set Reload Enabled(Event Player, False);
+	}
+}
+
+rule("Lucio: Disable basline aura by applying slow - slow player")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is True For Any(Players Within Radius(Event Player, 12, Team Of(Event Player), Surfaces And Enemy Barriers), Hero Of(
+			Current Array Element) == Hero(Lúcio)) == True;
+	}
+
+	actions
+	{
+		Start Forcing Throttle(Event Player, 0, 0.750, 0, 0.750, 0, 0.750);
+	}
+}
+
+rule("Lucio: Enable ability 1 when switching off lucio")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Lúcio);
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, True);
+		Set Secondary Fire Enabled(Event Player, True);
+		Set Reload Enabled(Event Player, True);
+	}
+}
+
+rule("Lucio: Disable basline aura by applying slow - speed up player")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is True For Any(Players Within Radius(Event Player, 12, Team Of(Event Player), Surfaces And Enemy Barriers), Hero Of(
+			Current Array Element) == Hero(Lúcio)) == False;
+	}
+
+	actions
+	{
+		Stop Forcing Throttle(Event Player);
+	}
+}
+
+rule("Lucio: Ammo added on melee")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lúcio;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+		disabled Is Firing Primary(Event Player) == False;
+		disabled Ammo(Event Player, 0) == 0;
+	}
+
+	actions
+	{
+		Set Secondary Fire Enabled(Event Player, True);
+		Event Player.lucioSwitchAllowed = False;
+		Press Button(Event Player, Button(Secondary Fire));
+		Wait(0.100, Ignore Condition);
+		disabled Set Ammo(Event Player, 0, 4);
+		Event Player.lucioSwitchAllowed = True;
+		Set Secondary Fire Enabled(Event Player, False);
+	}
+}
+
+rule("Lucio: Crossfade & Reverse Amp handeler")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		disabled Is True For Any(All Players(Team Of(Event Player)), Hero Of(Current Array Element) == Hero(Lúcio)) == True;
+		Is True For Any(Players Within Radius(Event Player, 1000, Team Of(Event Player), Surfaces And Enemy Barriers), Hero Of(
+			Current Array Element) == Hero(Lúcio)) == True;
+	}
+
+	actions
+	{
+		If(Event Player.lucioTrackNumber == 0);
+			Start Heal Over Time(Event Player, Event Player, 0.250, 4);
+			disabled Event Player.lucioHOT_ID = Last Heal Over Time ID;
+			Set Move Speed(Event Player, 100);
+			Set Damage Received(Event Player, 100);
+			Set Damage Dealt(Event Player, 100);
+		Else If(Event Player.lucioTrackNumber == 1);
+			Set Move Speed(Event Player, 125);
+			Set Damage Received(Event Player, 100);
+			Set Damage Dealt(Event Player, 100);
+		Else If(Event Player.lucioTrackNumber == 2);
+			Set Move Speed(Event Player, 100);
+			Set Damage Received(Event Player, 75);
+			Set Damage Dealt(Event Player, 100);
+		Else If(Event Player.lucioTrackNumber == 3);
+			Set Move Speed(Event Player, 100);
+			Set Damage Received(Event Player, 100);
+			Set Damage Dealt(Event Player, 110);
+		End;
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Set Move Speed(Event Player, 100);
+		Set Damage Received(Event Player, 100);
+		Set Damage Dealt(Event Player, 100);
+	}
+}
+
+rule("Lucio: Handle amp")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lúcio;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Cancel Primary Action(Event Player);
+	}
+}
+
+rule("Lucio: Handle new crossfade")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+		Event Player.lucioSwitchAllowed == True;
+	}
+
+	actions
+	{
+		Event Player.lucioSwitchAllowed = False;
+		If(Event Player.lucioTrackNumber == 0);
+			Event Player.lucioTrackNumber = 1;
+		Else If(Event Player.lucioTrackNumber == 1);
+			Event Player.lucioTrackNumber = 0;
+		Else If(Event Player.lucioTrackNumber == 2);
+			Event Player.lucioTrackNumber = 3;
+		Else If(Event Player.lucioTrackNumber == 3);
+			Event Player.lucioTrackNumber = 2;
+		End;
+		Call Subroutine(Sub3_genjiStopUlt);
+		Wait(0.400, Ignore Condition);
+		Event Player.lucioSwitchAllowed = True;
+	}
+}
+
+rule("Lucio: Handle reverse amp")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Event Player.lucioSwitchAllowed == True;
+	}
+
+	actions
+	{
+		Event Player.lucioSwitchAllowed = False;
+		If(Event Player.lucioTrackNumber == 0);
+			Event Player.lucioTrackNumber = 2;
+		Else If(Event Player.lucioTrackNumber == 1);
+			Event Player.lucioTrackNumber = 3;
+		Else If(Event Player.lucioTrackNumber == 2);
+			Event Player.lucioTrackNumber = 0;
+		Else If(Event Player.lucioTrackNumber == 3);
+			Event Player.lucioTrackNumber = 1;
+		End;
+		Call Subroutine(Sub3_genjiStopUlt);
+		Wait(0.400, Ignore Condition);
+		Event Player.lucioSwitchAllowed = True;
+	}
+}
+
+rule("Lucio: Handle effects for crossfade and reverse amp")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Lúcio;
+	}
+
+	conditions
+	{
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(0.250, Ignore Condition);
+		Destroy Effect(Event Player.lucioEffectsArray[0]);
+		Destroy HUD Text(Event Player.lucioEffectsArray[1]);
+		If(Event Player.lucioTrackNumber == 0);
+			Create Effect(All Players(Team Of(Event Player)), Good Aura, Color(Yellow), Event Player, 1, Visible To Position and Radius);
+			Event Player.lucioEffectsArray[0] = Last Created Entity;
+			Event Player.lucioEffectsHistory[1] = Append To Array(Event Player.lucioEffectsHistory[1], Last Created Entity);
+			Create HUD Text(Event Player, Custom String("Now Playing: Rejuvenescência"), Null, Null, Top, 0, Color(Yellow), Color(White),
+				Color(White), Visible To and String, Default Visibility);
+			Event Player.lucioEffectsArray[1] = Last Text ID;
+			Event Player.lucioEffectsHistory[2] = Append To Array(Event Player.lucioEffectsHistory[2], Last Text ID);
+		Else If(Event Player.lucioTrackNumber == 1);
+			Create Effect(All Players(Team Of(Event Player)), Good Aura, Color(Green), Event Player, 1, Visible To Position and Radius);
+			Event Player.lucioEffectsArray[0] = Last Created Entity;
+			Event Player.lucioEffectsHistory[1] = Append To Array(Event Player.lucioEffectsHistory[1], Last Created Entity);
+			Create HUD Text(Event Player, Custom String("Now Playing: We Move Together As One"), Null, Null, Top, 0, Color(Green), Color(
+				White), Color(White), Visible To and String, Default Visibility);
+			Event Player.lucioEffectsArray[1] = Last Text ID;
+			Event Player.lucioEffectsHistory[2] = Append To Array(Event Player.lucioEffectsHistory[2], Last Text ID);
+		Else If(Event Player.lucioTrackNumber == 2);
+			Create Effect(All Players(Team Of(Event Player)), Good Aura, Color(Blue), Event Player, 1, Visible To Position and Radius);
+			Event Player.lucioEffectsArray[0] = Last Created Entity;
+			Event Player.lucioEffectsHistory[1] = Append To Array(Event Player.lucioEffectsHistory[1], Last Created Entity);
+			Create HUD Text(Event Player, Custom String("Now Playing: Hard Light, Hard Time"), Null, Null, Top, 0, Color(Blue), Color(White),
+				Color(White), Visible To and String, Default Visibility);
+			Event Player.lucioEffectsArray[1] = Last Text ID;
+			Event Player.lucioEffectsHistory[2] = Append To Array(Event Player.lucioEffectsHistory[2], Last Text ID);
+		Else If(Event Player.lucioTrackNumber == 3);
+			Create Effect(All Players(Team Of(Event Player)), Good Aura, Color(Purple), Event Player, 1, Visible To Position and Radius);
+			Event Player.lucioEffectsArray[0] = Last Created Entity;
+			Event Player.lucioEffectsHistory[1] = Append To Array(Event Player.lucioEffectsHistory[1], Last Created Entity);
+			Create HUD Text(Event Player, Custom String("Now Playing: Maximum Tempo"), Null, Null, Top, 0, Color(Purple), Color(White), Color(
+				White), Visible To and String, Default Visibility);
+			Event Player.lucioEffectsArray[1] = Last Text ID;
+			Event Player.lucioEffectsHistory[2] = Append To Array(Event Player.lucioEffectsHistory[2], Last Text ID);
+		End;
+		Loop;
+	}
+}
+
+rule("Lucio: Destroy effects on death")
+{
+	event
+	{
+		Player Died;
+		All;
+		Lúcio;
+	}
+
+	actions
+	{
+		Event Player.lucioEffectsHistory[0] = 1;
+		For Player Variable(Event Player, lucioEffectsHistory, 0, Count Of(Event Player.lucioEffectsHistory), 1);
+			Destroy Effect(Event Player.lucioEffectsHistory[1][Event Player.lucioEffectsHistory[0]]);
+			Destroy HUD Text(Event Player.lucioEffectsHistory[2][Event Player.lucioEffectsHistory[0]]);
+			Event Player.lucioEffectsHistory[0] += 1;
+		End;
+		Event Player.lucioEffectsHistory = Array(0, Array(), Array());
+	}
+}
+
+rule("Roadhog: Start")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	actions
+	{
+		Set Reload Enabled(Event Player, False);
+	}
+}
+
+rule("Roadhog: Create bar on start playing")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	actions
+	{
+		Create Progress Bar HUD Text(Event Player, Event Player.roadhogScrapBarValue, Custom String("Scrap Power:",
+			Event Player.roadhogScrapBarValue), Top, 3, Color(Gray), Color(Gray), Visible To Values and Color, Default Visibility);
+		Event Player.roadhogScrapBarID = Last Text ID;
+	}
+}
+
+rule("Roadhog: Delete bar on death")
+{
+	event
+	{
+		Player Died;
+		All;
+		Roadhog;
+	}
+
+	actions
+	{
+		Destroy Progress Bar HUD Text(Event Player.roadhogScrapBarID);
+	}
+}
+
+rule("Roadhog: Disable Secondary if not enough ammo")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Ammo(Event Player, 0) < 2;
+	}
+
+	actions
+	{
+		Set Secondary Fire Enabled(Event Player, False);
+	}
+}
+
+rule("Roadhog: Grant 1 ammo on casting reload")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Reload)) == True;
+		Event Player.roadhogReloadTimer == 0;
+	}
+
+	actions
+	{
+		If(Ammo(Event Player, 0) + 1 <= 6);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+			Event Player.roadhogReloadTimer = 12;
+			Chase Player Variable Over Time(Event Player, roadhogReloadTimer, 0, 12, Destination and Duration);
+		End;
+	}
+}
+
+rule("Roadhog: Add 15 power if delt damage with primary")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Event Damage == Button(Primary Fire);
+	}
+
+	actions
+	{
+		If(Event Player.roadhogScrapBarValue + 15 > 100);
+			Event Player.roadhogScrapBarValue = 100;
+		Else;
+			Event Player.roadhogScrapBarValue += 15;
+		End;
+	}
+}
+
+rule("Roadhog: Add 30 power if delt damage with secondary")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Event Damage == Button(Secondary Fire);
+	}
+
+	actions
+	{
+		If(Event Player.roadhogScrapBarValue + 30 > 100);
+			Event Player.roadhogScrapBarValue = 100;
+		Else;
+			Event Player.roadhogScrapBarValue += 30;
+		End;
+		disabled Set Ammo(Event Player, 0, Ammo(Event Player, 0) - 1);
+	}
+}
+
+rule("Roadhog: Start reload if fired primary")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Firing Primary(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(2, Ignore Condition);
+		If(Ammo(Event Player, 0) + 1 <= 6);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+		End;
+		disabled Event Player.roadhogScrapBarValue += 15;
+	}
+}
+
+rule("Roadhog: Start reload if fired secondary")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Firing Secondary(Event Player) == True;
+	}
+
+	actions
+	{
+		Wait(2, Ignore Condition);
+		If(Ammo(Event Player, 0) + 2 <= 6);
+			Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 2);
+		End;
+		disabled Event Player.roadhogScrapBarValue += 15;
+		Set Ammo(Event Player, 0, Ammo(Event Player, 0) - 1);
+	}
+}
+
+rule("Roadhog: Record all damage events")
+{
+	event
+	{
+		Player Took Damage;
+		All;
+		Roadhog;
+	}
+
+	actions
+	{
+		Event Player.roadhogDamageHistory = Append To Array(Event Player.roadhogDamageHistory, Array(Total Time Elapsed, Event Damage));
+		For Player Variable(Event Player, roadhogDamageHistoryItterator, 0, Count Of(Event Player.roadhogDamageHistory), 1);
+			If(Event Player.roadhogDamageHistory[Event Player.roadhogDamageHistoryItterator][0] < Total Time Elapsed - 5);
+				Modify Player Variable At Index(Event Player, roadhogDamageHistory, Event Player.roadhogDamageHistoryItterator,
+					Remove From Array By Index, Event Player.roadhogDamageHistoryItterator);
+			End;
+		End;
+	}
+}
+
+rule("Roadhog: Operate new Take a Breather")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Using Ability 2(Event Player) == True;
+	}
+
+	actions
+	{
+		Cancel Primary Action(Event Player);
+		Event Player.roadhogHealArrayTotal = 0;
+		For Player Variable(Event Player, roadhogDamageHistoryItterator, 0, Count Of(Event Player.roadhogDamageHistory), 1);
+			Event Player.roadhogHealArrayTotal += Event Player.roadhogHealArrayTotal[Event Player.roadhogDamageHistoryItterator][1];
+		End;
+		If(Event Player.roadhogHealArrayTotal * 0.250 < 150);
+			Start Heal Over Time(Event Player, Event Player, 1, 150);
+		Else;
+			Start Heal Over Time(Event Player, Event Player, 1, Event Player.roadhogHealArrayTotal * 0.250);
+		End;
+		Event Player.roadhogHealCost = 45;
+		While(Event Player.roadhogHealCost > 30 && Event Player.roadhogButcheryStacks > 0);
+			Event Player.roadhogHealCost -= 5;
+			Event Player.roadhogButcheryStacks -= 1;
+		End;
+		Event Player.roadhogScrapBarValue -= Event Player.roadhogHealCost;
+		Event Player.hero = Append To Array(Event Player.roadhogHealAreaValues, Position Of(Event Player));
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues, True);
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues, Array());
+		Create Effect(All Players(Team Of(Event Player)), Ring, Color(Yellow), Event Player.roadhogHealAreaValues[0], 5,
+			Visible To Position and Radius);
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues[2], Last Created Entity);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Color(Orange), Event Player.roadhogHealAreaValues[0], 5,
+			Visible To Position and Radius);
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues[2], Last Created Entity);
+		Create Effect(All Players(Team Of(Event Player)), Cloud, Color(Yellow), Event Player.roadhogHealAreaValues[0], 5,
+			Visible To Position and Radius);
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues[2], Last Created Entity);
+		Create Effect(All Players(Team Of(Event Player)), Ring, Color(Orange), Event Player.roadhogHealAreaValues[0], 5,
+			Visible To Position and Radius);
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues[2], Last Created Entity);
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues, 0);
+		While(Event Player.roadhogHealAreaValues[3] == 3);
+			Wait(0.250, Ignore Condition);
+			Start Heal Over Time(Players Within Radius(Event Player.roadhogHealAreaValues[0], 5, Team Of(Event Player),
+				Surfaces And Enemy Barriers), Event Player, 0.250, 5);
+			Event Player.roadhogHealAreaValues[3] += 0.250;
+		End;
+		Event Player.roadhogHealAreaValues = Append To Array(Event Player.roadhogHealAreaValues, 0);
+		While(Event Player.roadhogHealAreaValues[4] <= Count Of(Event Player.roadhogHealAreaValues[2]));
+			Destroy Effect(Event Player.roadhogHealAreaValues[2][Event Player.roadhogHealAreaValues[4]]);
+			Event Player.roadhogHealAreaValues[4] = Event Player.roadhogHealAreaValues[4] + 1;
+		End;
+	}
+}
+
+rule("Roadhog: Operate new Hook self")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+		disabled Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) * 20, Null, All Players(All Teams), False) == True;
+	}
+
+	actions
+	{
+		If(Ray Cast Hit Player(Eye Position(Event Player), Eye Position(Event Player) * 20, All Players(Opposite Team Of(Team Of(
+			Event Player))), All Players(Team Of(Event Player)), True) == True);
+			Apply Impulse(Event Player, Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) * 20, Null, All Players(
+				All Teams), False), 40, To World, Cancel Contrary Motion);
+		End;
+	}
+}
+
+rule("Roadhog: Operate new Hook enimy")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Ability 1)) == True;
+		Event Ability == Button(Ability 1);
+		disabled Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) * 20, Null, All Players(All Teams), False) == True;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Vector Towards(Eye Position(Event Player), Eye Position(Victim)), 40, To World,
+			Cancel Contrary Motion);
+		Start Forcing Throttle(Victim, 0, 0, 0, 0, 0, 0);
+		Set Gravity(Event Player, 75);
+		disabled Event Player.roadhogEnimyRootPosition = Position Of(Victim);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+		Stop Forcing Throttle(Victim);
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("Roadhog: Disable hook if not enough scrap power")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Event Player.roadhogScrapBarValue < 30;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, False);
+		Wait Until(Event Player.roadhogScrapBarValue >= 30, 350);
+		Set Ability 1 Enabled(Event Player, True);
+	}
+}
+
+rule("Roadhog: Disable heal if not enough scrap power")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Event Player.roadhogScrapBarValue > Event Player.roadhogHealCost;
+	}
+
+	actions
+	{
+		Event Player.roadhogConsumeStacks = False;
+		If(Event Player.roadhogScrapBarValue < Event Player.roadhogHealCost);
+			Set Ability 1 Enabled(Event Player, False);
+		End;
+		Wait Until(Event Player.roadhogScrapBarValue >= 30, 350);
+		Set Ability 1 Enabled(Event Player, True);
+	}
+}
+
+rule("Roadhog: Call Evalueate heal cost while playing roadhog")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Alive(Event Player) == True;
+	}
+
+	actions
+	{
+		Call Subroutine(Sub7_evaluateRoadhogHealCost);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+		Event Player.roadhogHealCost = 45;
+	}
+}
+
+rule("Roadhog: Push back when firing ult")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Roadhog;
+	}
+
+	conditions
+	{
+		Is Using Ultimate(Event Player) == True;
+		disabled Is In Air(Event Player) == True;
+		disabled Vertical Facing Angle Of(Event Player) >= 70;
+		disabled Is Button Held(Event Player, Button(Jump)) == True;
+		disabled Altitude Of(Event Player) < 10;
+	}
+
+	actions
+	{
+		Apply Impulse(Event Player, Facing Direction Of(Event Player), -1.500, To World, Incorporate Contrary Motion);
+		Set Gravity(Event Player, 75);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+		Set Gravity(Event Player, 100);
+	}
+}
+
+rule("Roadhog: Reset everything")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Roadhog);
+	}
+
+	actions
+	{
+		Destroy HUD Text(Event Player.roadhogScrapBarID);
+		Set Ability 1 Enabled(Event Player, True);
+		Set Ability 2 Enabled(Event Player, True);
+		Set Secondary Fire Enabled(Event Player, True);
+	}
+}
+
+disabled rule("Ashe: Setup")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	actions
+	{
+		disabled Set Damage Dealt(Event Player, 10);
+		Set Ability Cooldown(Event Player, Button(Ability 1), 0);
+		Set Ability Cooldown(Event Player, Button(Ability 2), 7);
+	}
+}
+
+rule("Ashe: Coach gun cost")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) == Hero(Ashe);
+		disabled Ammo(Event Player, 0) < Max Ammo(Event Player, 0);
+		disabled Is Reloading(Event Player) == False;
+		disabled Is Firing Primary(Event Player) == False;
+		disabled Is Firing Secondary(Event Player) == False;
+		disabled Is Using Ability 1(Event Player) == False;
+		disabled Is Using Ability 2(Event Player) == False;
+		disabled Is Using Ultimate(Event Player) == False;
+	}
+
+	actions
+	{
+		While(Is Firing Primary(Event Player) == False && Is Firing Secondary(Event Player) == False && Is Using Ability 1(Event Player)
+			== False && Is Using Ability 2(Event Player) == False);
+			Wait(1, Ignore Condition);
+			If(Is Firing Primary(Event Player) == False && Is Firing Secondary(Event Player) == False && Is Using Ability 1(Event Player)
+				== False && Is Using Ability 2(Event Player) == False);
+				Press Button(Event Player, Button(Reload));
+			End;
+		End;
+	}
+}
+
+disabled rule("Ashe: Setup")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Ashe;
+	}
+
+	actions
+	{
+		disabled Set Damage Dealt(Event Player, 10);
+		Set Ability Cooldown(Event Player, Button(Ability 1), 0);
+		Set Ability Cooldown(Event Player, Button(Ability 2), 7);
+	}
+}
+
+disabled rule("Mercy: Give ult if player died")
+{
+	event
+	{
+		Player Died;
+		All;
+		All;
+	}
+
+	actions
+	{
+		Set Ultimate Charge(Players On Hero(Hero(Mercy), Team Of(Event Player)), 100);
+		Press Button(Players On Hero(Hero(Mercy), Team Of(Event Player)), Button(Ultimate));
+		Wait(7.500, Ignore Condition);
+		Cancel Primary Action(Event Player);
+		If(Ultimate Charge Percent(Players On Hero(Hero(Mercy), Team Of(Event Player))) < 25);
+			Set Ultimate Charge(Players On Hero(Hero(Mercy), Team Of(Event Player)), 0);
+		Else If(Ultimate Charge Percent(Players On Hero(Hero(Mercy), Team Of(Event Player))) > 25);
+			Set Ultimate Charge(Players On Hero(Hero(Mercy), Team Of(Event Player)), Ultimate Charge Percent(Players On Hero(Hero(Mercy),
+				Team Of(Event Player))) - 25);
+		End;
+	}
+}
+
+rule("Mercy: Handle Valkyrie")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) == Hero(Mercy);
+		Is Button Held(Event Player, Button(Ability 2)) == True;
+		Ability Cooldown(Event Player, Button(Ability 2)) <= 0;
+		Event Player.mercyUsingValk == False;
+		Event Player.mercyRezing == False;
+	}
+
+	actions
+	{
+		Cancel Primary Action(Event Player);
+		Event Player.mercyCooldowns = Array(Ultimate Charge Percent(Event Player), Ability Cooldown(Event Player, Button(Ability 1)),
+			Ability Cooldown(Event Player, Button(Ability 2)), Weapon(Event Player), Health(Event Player));
+		Event Player.mercyUsingValk = True;
+		Set Ultimate Charge(Event Player, 100);
+		Press Button(Event Player, Button(Ultimate));
+		Wait(0.500, Ignore Condition);
+		Set Ultimate Charge(Event Player, Event Player.mercyCooldowns[0]);
+		Event Player.mercyUsingValk = False;
+		Set Ability Cooldown(Event Player, Button(Ability 1), Event Player.mercyCooldowns[1]);
+		Set Ability Cooldown(Event Player, Button(Ability 2), 6);
+		Wait(3, Ignore Condition);
+		Event Player.mercyCooldowns = Array(Ultimate Charge Percent(Event Player), Ability Cooldown(Event Player, Button(Ability 1)),
+			Ability Cooldown(Event Player, Button(Ability 2)), Weapon(Event Player), Health(Event Player));
+		disabled Start Forcing Player To Be Hero(Event Player, Remove From Array(Randomized Array(All Heroes), Hero Of(Event Player)));
+		Start Forcing Player To Be Hero(Event Player, Hero(Sigma));
+		Wait(0.001, Ignore Condition);
+		Start Forcing Player To Be Hero(Event Player, Hero(Mercy));
+		Wait(0.001, Ignore Condition);
+		Stop Forcing Player To Be Hero(Event Player);
+		Set Ultimate Charge(Event Player, Event Player.mercyCooldowns[0]);
+		Set Ability Cooldown(Event Player, Button(Ability 1), Event Player.mercyCooldowns[1]);
+		Set Ability Cooldown(Event Player, Button(Ability 2), Event Player.mercyCooldowns[2]);
+		Set Weapon(Event Player, Event Player.mercyCooldowns[3]);
+		Set Player Health(Event Player, Event Player.mercyCooldowns[4]);
+	}
+}
+
+rule("Mercy: Track ult as variable")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Genji;
+	}
+
+	conditions
+	{
+		True == True;
+	}
+
+	actions
+	{
+		Event Player.mercyCooldowns = Ultimate Charge Percent(Event Player);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Mercy: Mass Rez")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		disabled Hero Of(Event Player) == Hero(Mercy);
+		Event Player.mercyUsingValk == False;
+		Is Button Held(Event Player, Button(Ultimate)) == True;
+		Ultimate Charge Percent(Event Player) == 100;
+		Is True For Any(Players Within Radius(Eye Position(Event Player), 5, Team Of(Event Player), Off), Is Dead(Current Array Element)
+			== True) == True;
+	}
+
+	actions
+	{
+		Event Player.mercyRezing = True;
+		Event Player.mercyRezList = Filtered Array(Players Within Radius(Eye Position(Event Player), 20, Team Of(Event Player), Off),
+			Is Dead(Event Player) == True);
+		Press Button(Event Player, Button(Ability 2));
+		disabled Set Move Speed(Event Player, 175);
+		Resurrect(Players Within Radius(Eye Position(Event Player), 20, Team Of(Event Player), Off));
+		Wait(1.750, Ignore Condition);
+		disabled Set Move Speed(Event Player, 100);
+		Cancel Primary Action(Event Player);
+		Set Ultimate Charge(Event Player, 100 - 20 * Count Of(Event Player.mercyRezList));
+		Event Player.mercyRezing = False;
+	}
+}
+
+rule("Mercy: Sort Brittle Healing for mercy player")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Is Button Held(Event Player, Button(Secondary Fire)) == False;
+		Is Firing Primary(Event Player) == False;
+		Is Firing Secondary(Event Player) == False;
+	}
+
+	actions
+	{
+		If(Event Player.mercyIsBrittleHealing == False);
+			Event Player.mercyBrittleHealingTargetSlotID = Slot Of(Player Closest To Reticle(Event Player, Opposite Team Of(Team Of(
+				Event Player))));
+			Event Player.mercyIsBrittleHealing = True;
+			Players In Slot(Event Player.mercyBrittleHealingTargetSlotID, Opposite Team Of(Team Of(Event Player)))
+				.mercyBrittleHealingStartHealth = Health(Players In Slot(Event Player.mercyBrittleHealingTargetSlotID, Opposite Team Of(
+				Team Of(Event Player))));
+			Players In Slot(Event Player.mercyBrittleHealingTargetSlotID, Opposite Team Of(Team Of(Event Player)))
+				.mercyPlayerHasBrittleHealth = True;
+			Players In Slot(Event Player.mercyBrittleHealingTargetSlotID, Opposite Team Of(Team Of(Event Player)))
+				.mercyBrittleHealerSlotID = Slot Of(Event Player);
+			Create Beam Effect(All Players(All Teams), Bad Beam, Eye Position(Event Player), Eye Position(Players In Slot(
+				Event Player.mercyBrittleHealingTargetSlotID, Opposite Team Of(Team Of(Event Player)))), Color(Orange),
+				Visible To Position and Radius);
+			Event Player.mercyBrittleHealingEffect = Last Created Entity;
+		End;
+		Start Heal Over Time(Event Player.mercyBrittleHealingTargetSlotID, Event Player, 0.250, 13.750);
+		Event Player.mercyBrittleHealingHoT_ID = Last Heal Over Time ID;
+		Wait(0.250, Ignore Condition);
+		Stop Heal Over Time(Event Player.mercyBrittleHealingHoT_ID);
+		Abort If(Is Button Held(Event Player, Button(Secondary Fire)) == True);
+		Loop If Condition Is True;
+		Event Player.mercyIsBrittleHealing = False;
+		Destroy Effect(Event Player.mercyBrittleHealingEffect);
+	}
+}
+
+rule("Mercy: Remove Brittle Health after it's been removed")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Event Player.mercyPlayerHasBrittleHealth == True;
+	}
+
+	actions
+	{
+		Wait(0.250, Ignore Condition);
+		Loop If(Health(Event Player) > Event Player.mercyBrittleHealingStartHealth);
+		Event Player.mercyPlayerHasBrittleHealth = False;
+	}
+}
+
+rule("Mercy: Handel player having Brittle Health")
+{
+	event
+	{
+		Player Took Damage;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Event Player.mercyPlayerHasBrittleHealth == True;
+	}
+
+	actions
+	{
+		Damage(Event Player, Attacker, Event Damage * 0.400);
+	}
+}
+
+rule("Mercy: Depowering")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Mercy;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Primary Fire)) == False;
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+		Is Firing Primary(Event Player) == False;
+		Is Firing Secondary(Event Player) == False;
+	}
+
+	actions
+	{
+		If(Event Player.mercyIsDepowering == False);
+			Event Player.mercyDepoweringTargetSlotID = Slot Of(Player Closest To Reticle(Event Player, Opposite Team Of(Team Of(
+				Event Player))));
+			Event Player.mercyIsDepowering = True;
+			Create Beam Effect(All Players(All Teams), Bad Beam, Eye Position(Event Player), Eye Position(Players In Slot(
+				Event Player.mercyDepoweringTargetSlotID, Opposite Team Of(Team Of(Event Player)))), Color(Purple),
+				Visible To Position and Radius);
+			Start Damage Modification(All Players(Opposite Team Of(Team Of(Players In Slot(Event Player.mercyDepoweringTargetSlotID,
+				Opposite Team Of(Team Of(Event Player)))))), Event Player.mercyDepoweringTargetSlotID, 60,
+				Receivers Damagers and Damage Percent);
+			Event Player.mercyDepoweringID = Last Damage Modification ID;
+		End;
+		Wait(0.250, Ignore Condition);
+		Abort If(Is Button Held(Event Player, Button(Primary Fire)) == True);
+		Loop If Condition Is True;
+		Event Player.mercyIsDepowering = False;
+		Destroy Effect(Event Player.mercyDepoweringEffect);
+		Stop Damage Modification(Event Player.mercyDepoweringID);
+	}
+}
+
+rule("Brigitta: Start")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) == Hero(Brigitte);
+	}
+
+	actions
+	{
+		Set Damage Received(Event Player, 80);
+		Add Health Pool To Player(Event Player, Armor, 100, True, True);
+	}
+}
+
+rule("Brigitta: Reduce CD of whip shot and sheild bash")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Primary Fire)) == True;
+		Is Firing Secondary(Event Player) == False;
+	}
+
+	actions
+	{
+		Wait(0.300, Ignore Condition);
+		Set Ability Cooldown(Event Player, Button(Ability 1), Ability Cooldown(Event Player, Button(Ability 1)) - 1);
+		Set Ability Cooldown(Event Player, Button(Primary Fire), Ability Cooldown(Event Player, Button(Primary Fire)) - 1);
+		Wait(0.300, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Brigitta: Give healing charge when hitting with ranged boop")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Event Ability == Button(Ability 1);
+	}
+
+	actions
+	{
+		If(Ability Charge(Event Player, Button(Ability 2)) < 3);
+			Set Ability Charge(Event Player, Button(Ability 2), Ability Charge(Event Player, Button(Ability 2)) + 1);
+		End;
+	}
+}
+
+rule("Brigitta: Give healing charge when hitting with sheild bash and damage")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Event Ability == Button(Primary Fire);
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+	}
+
+	actions
+	{
+		If(Ability Charge(Event Player, Button(Ability 2)) < 3);
+			Set Ability Charge(Event Player, Button(Ability 2), Ability Charge(Event Player, Button(Ability 2)) + 1);
+		End;
+	}
+}
+
+rule("Brigitta: Put armour on target with health pack")
+{
+	event
+	{
+		Player Received Healing;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		disabled Is Button Held(Event Player, Button(Ability 2)) == True;
+		Event Ability == Button(Ability 2);
+		Team Of(Healer) == Team Of(Event Player);
+		Hero Of(Healer) == Hero(Brigitte);
+		Health Of Type(Event Player, Armor) <= 0;
+	}
+
+	actions
+	{
+		Start Damage Over Time(Healee, Healer, 2, 36.630);
+		Add Health Pool To Player(Event Player, Armor, 100, False, True);
+	}
+}
+
+rule("Brigitta: Stop")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Brigitte;
+	}
+
+	conditions
+	{
+		Hero Of(Event Player) != Hero(Brigitte);
+	}
+
+	actions
+	{
+		Set Damage Received(Event Player, 100);
+		Remove All Health Pools From Player(Event Player);
+	}
+}
+
+rule("Sojourn: Add ammo")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sojourn;
+	}
+
+	conditions
+	{
+		Ammo(Event Player, 0) < Max Ammo(Event Player, 0);
+	}
+
+	actions
+	{
+		Set Ammo(Event Player, 0, Ammo(Event Player, 0) + 1);
+		Wait(0.100, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Sojourn: Allow secondary at 5ths")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sojourn;
+	}
+
+	conditions
+	{
+		Ability Resource(Event Player, Button(Secondary Fire)) > 20;
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+	}
+
+	actions
+	{
+		Set Secondary Fire Enabled(Event Player, True);
+		Press Button(Event Player, Button(Secondary Fire));
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire)) - 20);
+		Set Secondary Fire Enabled(Event Player, False);
+		Wait Until(Is Button Held(Event Player, Button(Secondary Fire)) == False, 99999);
+	}
+}
+
+rule("Sojourn: Allow slide at 5ths")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sojourn;
+	}
+
+	conditions
+	{
+		Ability Resource(Event Player, Button(Secondary Fire)) > 20;
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
+	}
+
+	actions
+	{
+		Set Ability 1 Enabled(Event Player, True);
+		Press Button(Event Player, Button(Ability 1));
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire)) - 20);
+		Set Ability 1 Enabled(Event Player, False);
+		Wait Until(Is Button Held(Event Player, Button(Ability 1)) == False, 99999);
+	}
+}
+
+rule("Sojourn: Add double resource on headshot")
+{
+	event
+	{
+		Player Dealt Damage;
+		All;
+		Sojourn;
+	}
+
+	conditions
+	{
+		Event Was Critical Hit == True;
+	}
+
+	actions
+	{
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire)) + 0);
+	}
+}
+
+rule("Sojourn: Hits in the first one second or orb generate damage")
+{
+	event
+	{
+		Player Took Damage;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Hero Of(Attacker) == Hero(Sojourn);
+		Event Ability == Button(Ability 2);
+	}
+
+	actions
+	{
+		Set Ability Resource(Attacker, Button(Primary Fire), Ability Resource(Attacker, Button(Primary Fire)) + 0);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Sojourn: Start at 60 soul shards")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sojourn;
+	}
+
+	conditions
+	{
+		Is In Spawn Room(Event Player) == True;
+		Ability Resource(Event Player, Button(Secondary Fire)) < 60;
+	}
+
+	actions
+	{
+		Set Ability Resource(Event Player, Button(Primary Fire), Ability Resource(Event Player, Button(Primary Fire)) + 2);
+		Wait(0.200, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("Sojourn: Cancel slide on crouch")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		Sojourn;
+	}
+
+	conditions
+	{
+		Is Using Ability 1(Event Player) == True;
+		Is Button Held(Event Player, Button(Crouch)) == True;
+	}
+
+	actions
+	{
+		Cancel Primary Action(Event Player);
+	}
+}
